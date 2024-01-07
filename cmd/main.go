@@ -1,19 +1,4 @@
 package main
 
-import (
-	"log"
-
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
-)
-
 func main() {
-	mattermostBot := bot.LoadMattermostBot()
-	err := mattermostmessages.SendMessage(mattermostmessages.Message{
-		Text:      "abacaba",
-		ChannelId: "9gs6do7otff9fmgcrktnk9opra",
-	}, "http://localhost:8065", mattermostBot)
-	if err != nil {
-		log.Printf("%q\n", err)
-	}
 }
