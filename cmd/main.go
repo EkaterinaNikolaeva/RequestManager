@@ -1,49 +1,19 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
 	"log"
-	"net/http"
+
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
 )
 
-type config struct {
-	MattermostToken string `json:"mattermost_token"`
-}
-
-type Message struct {
-	Text      string `json:"message"`
-	ChannelId string `json:"channel_id"`
-}
-
 func main() {
-	config := loadConfig()
-	data, _ := json.Marshal(config)
-	var msg = Message{
+	mattermostBot := bot.LoadMattermostBot()
+	err := mattermostmessages.SendMessage(mattermostmessages.Message{
 		Text:      "abacaba",
 		ChannelId: "9gs6do7otff9fmgcrktnk9opra",
-	}
-	bytesRepresentation, err := json.Marshal(msg)
+	}, "http://localhost:8065", mattermostBot)
 	if err != nil {
-		log.Fatalln(err)
+		log.Printf("%q\n", err)
 	}
-	req, err := http.NewRequest("POST", "http://localhost:8065/api/v4/posts", bytes.NewBuffer(bytesRepresentation))
-	if err != nil {
-		log.Fatalln(err)
-	}
-	var bearer = "Bearer " + config.MattermostToken
-	req.Header.Add("Authorization", bearer)
-	client := &http.Client{}
-	resp, err := client.Do(req)
-
-	bytesResp, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(bytesResp))
-
-	fmt.Printf("%s\n", data)
 }
