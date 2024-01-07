@@ -3,8 +3,8 @@ package mattermostmessages
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
@@ -32,6 +32,6 @@ func SendMessage(msg Message, url string, bot bot.MattermostBot) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("MattermostBot send message: " + string(bytesResp))
+	log.Println("MattermostBot send message: " + string(bytesResp))
 	return nil
 }
