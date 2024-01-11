@@ -4,14 +4,15 @@ import (
 	"log"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
 	"github.com/mattermost/mattermost-server/v6/model"
 )
 
-func handler(event *model.WebSocketEvent) {
+func checkEventForJiraRequest(event *model.WebSocketEvent) {
 	if event.GetData()["post"] == nil {
 		return
 	}
-	log.Println(event.GetData())
+	mattermostmessages.CheckMessageForJiraRequest(event.GetData()["post"].(string))
 }
 
 func MakeServer(mattermostBot bot.MattermostBot, url string) {
@@ -28,7 +29,7 @@ func MakeServer(mattermostBot bot.MattermostBot, url string) {
 		for {
 			select {
 			case resp := <-webSocketClient.EventChannel:
-				handler(resp)
+				checkEventForJiraRequest(resp)
 			}
 		}
 	}()
