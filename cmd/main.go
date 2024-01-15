@@ -1,9 +1,8 @@
 package main
 
 import (
-	// "log"
-
 	"log"
+	"net/http"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
@@ -12,7 +11,8 @@ import (
 
 func main() {
 	mattermostBot := bot.LoadMattermostBot()
-	err := mattermostmessages.SendMessage(mattermostmessages.Message{
+	client := mattermostmessages.HttpClient(http.Client{})
+	err := client.SendMessage(mattermostmessages.Message{
 		Message:   "abacaba",
 		ChannelId: "9gs6do7otff9fmgcrktnk9opra",
 	}, "http://localhost:8065", mattermostBot)

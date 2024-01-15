@@ -51,7 +51,9 @@ func CheckMessageForJiraRequest(bytes string) {
 	}
 }
 
-func SendMessage(msg Message, url string, bot bot.MattermostBot) error {
+type HttpClient http.Client
+
+func (client *HttpClient) SendMessage(msg Message, url string, bot bot.MattermostBot) error {
 	bytesRepresentation, err := json.Marshal(msg)
 	if err != nil {
 		return err
@@ -62,8 +64,7 @@ func SendMessage(msg Message, url string, bot bot.MattermostBot) error {
 	}
 	var bearer = "Bearer " + bot.Token
 	req.Header.Add("Authorization", bearer)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := (*http.Client)(client).Do(req)
 	bytesResp, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
