@@ -53,6 +53,10 @@ func CheckMessageForJiraRequest(bytes string) {
 
 type HttpClient http.Client
 
+func NewHttpClient(client *http.Client) *HttpClient {
+	return (*HttpClient)(client)
+}
+
 func (client *HttpClient) SendMessage(msg Message, url string, bot bot.MattermostBot) error {
 	bytesRepresentation, err := json.Marshal(msg)
 	if err != nil {
