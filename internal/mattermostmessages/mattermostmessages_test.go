@@ -11,23 +11,23 @@ import (
 )
 
 func TestSendMessages(t *testing.T) {
-	testMsg := "test_msg"
+	testMsg := "test_post"
 	testChannelId := "test_chat_id"
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, req.URL.String(), "/api/v4/posts")
 		bufSize := 1024
 		buffer := make([]byte, bufSize)
 		length, _ := req.Body.Read(buffer)
-		var msg Message
-		json.Unmarshal(buffer[:length], &msg)
-		assert.Equal(t, msg.ChannelId, testChannelId)
-		assert.Equal(t, msg.Message, testMsg)
+		var post RequestPost
+		json.Unmarshal(buffer[:length], &post)
+		assert.Equal(t, post.ChannelId, testChannelId)
+		assert.Equal(t, post.Message, testMsg)
 		rw.Write([]byte(`OK`))
 	}))
 	defer server.Close()
 	client := server.Client()
 	mattermostBot := bot.LoadMattermostBot()
-	NewHttpClient(client).SendMessage(Message{
+	NewHttpClient(client).CreatePost(RequestPost{
 		Message:   testMsg,
 		ChannelId: testChannelId,
 	}, server.URL, mattermostBot)
