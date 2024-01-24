@@ -12,24 +12,36 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 )
 
-type Message struct {
+type HttpClient http.Client
+
+func NewHttpClient(client *http.Client) *HttpClient {
+	return (*HttpClient)(client)
+}
+
+type RequestPost struct {
+	ChannelId string                 `json:"channel_id"`
+	Message   string                 `json:"message"`
+	RootId    string                 `json:"root_id,omitempty"`
+	FileIds   []string               `json:"file_ids,omitempty"`
+	Props     interface{}            `json:"props,omitempty"`
+	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+}
+
+type ResponsePost struct {
 	Id            string                 `json:"id,omitempty"`
 	CreateAt      int                    `json:"create_at,omitempty"`
 	UpdateAt      int                    `json:"update_at,omitempty"`
-	EditAt        int                    `json:"edit_at,omitempty"`
 	DeleteAt      int                    `json:"delete_at,omitempty"`
-	IsPinned      bool                   `json:"is_pinned,omitempty"`
+	EditAt        int                    `json:"edit_at,omitempty"`
 	UserId        string                 `json:"user_id,omitempty"`
-	ChannelId     string                 `json:"channel_id"`
+	ChannelId     string                 `json:"channel_id,omitempty"`
 	RootId        string                 `json:"root_id,omitempty"`
 	OriginalId    string                 `json:"original_id,omitempty"`
-	Message       string                 `json:"message"`
-	Props         map[string]bool        `json:"props,omitempty"`
-	Hashtags      string                 `json:"hashtags,omitempty"`
+	Message       string                 `json:"message,omitempty"`
+	Type          string                 `json:"type,omitempty"`
+	Props         interface{}            `json:"props,omitempty"`
+	Hashtag       string                 `json:"hashtag,omitempty"`
 	PendingPostId string                 `json:"pending_post_id,omitempty"`
-	ReplyCount    int                    `json:"reply_count,omitempty"`
-	LastReplyAt   int                    `json:"last_reply_at,omitempty"`
-	Participants  map[string]interface{} `json:"participants,omitempty"`
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`
 }
 
@@ -39,20 +51,33 @@ func checkPatternInMessage(msg string) bool {
 	return validMsg.MatchString(strings.ToLower(msg))
 }
 
-func CheckMessageForJiraRequest(bytes string) {
-	var msg Message
-	err := json.Unmarshal([]byte(bytes), &msg)
+func (client *HttpClient) CheckMessageForJiraRequest(bytes string, mattermostBot bot.MattermostBot) {
+	var post ResponsePost
+	err := json.Unmarshal([]byte(bytes), &post)
 	if err != nil {
 		log.Printf("Error when encode message %q", err)
 		return
 	}
-	if checkPatternInMessage(msg.Message) {
-		log.Printf("Message: %s, make issue!", msg.Message)
+	if checkPatternInMessage(post.Message) {
+		client.makePostForCreation(post, mattermostBot)
 	}
 }
 
-func SendMessage(msg Message, url string, bot bot.MattermostBot) error {
-	bytesRepresentation, err := json.Marshal(msg)
+func (client *HttpClient) makePostForCreation(post ResponsePost, mattermostBot bot.MattermostBot) {
+	log.Printf("Message: %s, make issue!", post.Message)
+	rootId := post.Id
+	if post.RootId != "" {
+		rootId = post.RootId
+	}
+	client.CreatePost(RequestPost{
+		Message:   "Create an issue. Link: ",
+		ChannelId: post.ChannelId,
+		RootId:    rootId,
+	}, "http://localhost:8065", mattermostBot)
+}
+
+func (client *HttpClient) CreatePost(post RequestPost, url string, bot bot.MattermostBot) error {
+	bytesRepresentation, err := json.Marshal(post)
 	if err != nil {
 		return err
 	}
@@ -62,12 +87,11 @@ func SendMessage(msg Message, url string, bot bot.MattermostBot) error {
 	}
 	var bearer = "Bearer " + bot.Token
 	req.Header.Add("Authorization", bearer)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := (*http.Client)(client).Do(req)
 	bytesResp, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
-	log.Println("MattermostBot send message: " + string(bytesResp))
+	log.Printf("MattermostBot create post: %s", bytesResp)
 	return nil
 }

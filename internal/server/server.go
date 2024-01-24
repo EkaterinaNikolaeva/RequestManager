@@ -2,20 +2,22 @@ package server
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
 	"github.com/mattermost/mattermost-server/v6/model"
 )
 
-func checkEventForJiraRequest(event *model.WebSocketEvent) {
+func checkEventForJiraRequest(event *model.WebSocketEvent, client *mattermostmessages.HttpClient, mattermostBot bot.MattermostBot) {
 	if event.GetData()["post"] == nil {
 		return
 	}
-	mattermostmessages.CheckMessageForJiraRequest(event.GetData()["post"].(string))
+	client.CheckMessageForJiraRequest(event.GetData()["post"].(string), mattermostBot)
 }
 
 func MakeServer(mattermostBot bot.MattermostBot, url string) {
+	httpClient := mattermostmessages.NewHttpClient(&http.Client{})
 	mattermostClient := model.NewAPIv4Client("http://localhost:8065")
 	mattermostClient.SetToken(mattermostBot.Token)
 	mattermostClient.MockSession(mattermostBot.Token)
@@ -29,7 +31,7 @@ func MakeServer(mattermostBot bot.MattermostBot, url string) {
 		for {
 			select {
 			case resp := <-webSocketClient.EventChannel:
-				checkEventForJiraRequest(resp)
+				checkEventForJiraRequest(resp, httpClient, mattermostBot)
 			}
 		}
 	}()
