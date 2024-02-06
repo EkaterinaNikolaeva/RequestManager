@@ -13,7 +13,10 @@ func main() {
 	if len(os.Args) < 2 {
 		log.Fatalf("There is not enough args: file name of config")
 	}
-	config := config.LoadConfig(os.Args[1])
+	config, err := config.LoadConfig(os.Args[1])
+	if err != nil {
+		log.Fatalf("Error when opening config file: %q", err)
+	}
 	mattermostBot := bot.NewMattermostBot(config)
 	server.MakeServer(mattermostBot)
 }

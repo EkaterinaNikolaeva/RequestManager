@@ -14,22 +14,21 @@ type Config struct {
 	TeamName            string `yaml:"team_name"`
 }
 
-func LoadConfig(fileName string) Config {
+func LoadConfig(fileName string) (Config, error) {
 	log.Println(fileName)
 	file, err := os.Open(fileName)
 	if err != nil {
-		log.Fatalf("Error when opening config file: %q", err)
+		return Config{}, err
 	}
-
 	data := make([]byte, 1024)
 	size, err := file.Read(data)
 	if err != nil {
-		log.Fatalf("Error when reading config file: %q", err)
+		return Config{}, err
 	}
 	var config Config
 	err = yaml.Unmarshal(data[:size], &config)
 	if err != nil {
-		log.Fatalf("Error when encode config file %q", err)
+		return Config{}, err
 	}
-	return config
+	return config, nil
 }
