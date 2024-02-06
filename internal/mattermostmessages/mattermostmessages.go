@@ -73,7 +73,7 @@ func (client *HttpClient) makePostForCreation(post ResponsePost, mattermostBot b
 		Message:   "Create an issue. Link: ",
 		ChannelId: post.ChannelId,
 		RootId:    rootId,
-	}, "http://localhost:8065", mattermostBot)
+	}, mattermostBot.MattermostHttp, mattermostBot)
 }
 
 func (client *HttpClient) CreatePost(post RequestPost, url string, bot bot.MattermostBot) error {

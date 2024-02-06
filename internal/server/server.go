@@ -16,13 +16,13 @@ func checkEventForJiraRequest(event *model.WebSocketEvent, client *mattermostmes
 	client.CheckMessageForJiraRequest(event.GetData()["post"].(string), mattermostBot)
 }
 
-func MakeServer(mattermostBot bot.MattermostBot, url string) {
+func MakeServer(mattermostBot bot.MattermostBot) {
 	httpClient := mattermostmessages.NewHttpClient(&http.Client{})
-	mattermostClient := model.NewAPIv4Client("http://localhost:8065")
+	mattermostClient := model.NewAPIv4Client(mattermostBot.MattermostHttp)
 	mattermostClient.SetToken(mattermostBot.Token)
 	mattermostClient.MockSession(mattermostBot.Token)
-	log.Println(mattermostClient.GetTeamByName("jira-mattermost", ""))
-	webSocketClient, err := model.NewWebSocketClient4("ws://localhost:8065", mattermostBot.Token)
+	log.Println(mattermostClient.GetTeamByName(mattermostBot.TeamName, ""))
+	webSocketClient, err := model.NewWebSocketClient4(mattermostBot.MattermostWebsocket, mattermostBot.Token)
 	if err != nil {
 		log.Printf("error when creating new websocket client: %q", err)
 	}

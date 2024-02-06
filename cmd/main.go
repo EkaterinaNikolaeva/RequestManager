@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
@@ -9,8 +10,10 @@ import (
 )
 
 func main() {
-	mattermostBot := bot.LoadMattermostBot()
-	config := config.LoadConfig("../configs/config.json")
-	log.Printf("%s %s %s %s", config.EnvMattermostToken, config.MattermostHttp, config.MattermostWebsocket, config.TeamName)
-	server.MakeServer(mattermostBot, "http://localhost:8065")
+	if len(os.Args) < 2 {
+		log.Fatalf("There is not enough args: file name of config")
+	}
+	config := config.LoadConfig(os.Args[1])
+	mattermostBot := bot.NewMattermostBot(config)
+	server.MakeServer(mattermostBot)
 }
