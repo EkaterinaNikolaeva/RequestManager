@@ -1,15 +1,21 @@
 package bot
 
 import (
-	"os"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
 )
 
 type MattermostBot struct {
-	Token string
+	Token               string
+	TeamName            string
+	MattermostHttp      string
+	MattermostWebsocket string
 }
 
-func LoadMattermostBot() MattermostBot {
-	var settings MattermostBot
-	settings.Token = os.Getenv("MATTERMOST_TOKEN")
-	return settings
+func NewMattermostBot(config config.Config) MattermostBot {
+	var bot MattermostBot
+	bot.Token = config.MattermostToken
+	bot.TeamName = config.TeamName
+	bot.MattermostHttp = config.MattermostHttp
+	bot.MattermostWebsocket = config.MattermostWebsocket
+	return bot
 }

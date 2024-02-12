@@ -26,9 +26,8 @@ func TestSendMessages(t *testing.T) {
 	}))
 	defer server.Close()
 	client := server.Client()
-	mattermostBot := bot.LoadMattermostBot()
 	NewHttpClient(client).CreatePost(RequestPost{
 		Message:   testMsg,
 		ChannelId: testChannelId,
-	}, server.URL, mattermostBot)
+	}, server.URL, bot.MattermostBot{})
 }
