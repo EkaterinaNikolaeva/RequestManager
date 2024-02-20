@@ -1,9 +1,9 @@
 package service
 
-import "log"
-
 type Message struct {
-	Message string
+	Message   string
+	Chat      string
+	MessageId string
 }
 
 type Task struct {
@@ -12,6 +12,7 @@ type Task struct {
 
 type MessagesProvider interface {
 	GetMessagesChannel() <-chan Message
+	SendMessage(message Message) error
 }
 
 type TaskCreator interface {
@@ -35,12 +36,15 @@ func NewTaskFromMessagesCreator(provider MessagesProvider) TaskFromMessagesCreat
 }
 func (s TaskFromMessagesCreator) Run() {
 	messagesChannel := s.messagesProvider.GetMessagesChannel()
+
 	for {
-		message := <-messagesChannel
-		log.Println(message.Message)
-		// if s.messagesMatcher.MatchMessage(message) {
-		// 	// s.taskCreator.CreateTask()
-		// }
+		select {
+		case message := <-messagesChannel:
+			s.messagesProvider.SendMessage(message)
+			// if s.messagesMatcher.MatchMessage(message) {
+			// 	// s.taskCreator.CreateTask()
+			// }
+		}
 
 	}
 

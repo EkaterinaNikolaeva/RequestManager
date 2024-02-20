@@ -19,8 +19,8 @@ func main() {
 		log.Fatalf("Error when opening config file: %q", err)
 	}
 	mattermostBot := bot.NewMattermostBot(config)
-	provider := mattermostprovider.NewMattermostProvider()
-	go provider.Run(mattermostBot)
+	provider := mattermostprovider.NewMattermostProvider(mattermostBot)
+	go provider.Run()
 	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider)
 	taskFromMessagesCreator.Run()
 }
