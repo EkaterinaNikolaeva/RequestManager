@@ -7,6 +7,7 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostprovider"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesmatcher"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
 )
 
@@ -20,7 +21,8 @@ func main() {
 	}
 	mattermostBot := bot.NewMattermostBot(config)
 	provider := mattermostprovider.NewMattermostProvider(mattermostBot)
+	matcher := messagesmatcher.MessagesMatcher{}
 	go provider.Run()
-	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider)
+	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, matcher)
 	taskFromMessagesCreator.Run()
 }

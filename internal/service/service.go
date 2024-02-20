@@ -1,18 +1,18 @@
 package service
 
-type Message struct {
-	Message   string
-	Chat      string
-	MessageId string
-}
+import (
+	"log"
+
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/message"
+)
 
 type Task struct {
 	Text string
 }
 
 type MessagesProvider interface {
-	GetMessagesChannel() <-chan Message
-	SendMessage(message Message) error
+	GetMessagesChannel() <-chan message.Message
+	SendMessage(message message.Message) error
 }
 
 type TaskCreator interface {
@@ -20,7 +20,7 @@ type TaskCreator interface {
 }
 
 type MessagesMatcher interface {
-	MatchMessage(message Message)
+	MatchMessage(message message.Message) bool
 }
 
 type TaskFromMessagesCreator struct {
@@ -29,23 +29,22 @@ type TaskFromMessagesCreator struct {
 	messagesMatcher  MessagesMatcher
 }
 
-func NewTaskFromMessagesCreator(provider MessagesProvider) TaskFromMessagesCreator {
+func NewTaskFromMessagesCreator(provider MessagesProvider, matcher MessagesMatcher) TaskFromMessagesCreator {
 	return TaskFromMessagesCreator{
 		messagesProvider: provider,
+		messagesMatcher:  matcher,
 	}
 }
 func (s TaskFromMessagesCreator) Run() {
 	messagesChannel := s.messagesProvider.GetMessagesChannel()
-
+	log.Println("Server started!")
 	for {
-		select {
-		case message := <-messagesChannel:
-			s.messagesProvider.SendMessage(message)
-			// if s.messagesMatcher.MatchMessage(message) {
-			// 	// s.taskCreator.CreateTask()
-			// }
+		msg := <-messagesChannel
+		if s.messagesMatcher.MatchMessage(msg) {
+			s.messagesProvider.SendMessage(
+				message.Message{Message: "Make issue! Link: ",
+					Chat:      msg.Chat,
+					MessageId: msg.MessageId})
 		}
-
 	}
-
 }

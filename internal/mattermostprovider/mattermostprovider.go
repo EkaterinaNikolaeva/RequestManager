@@ -6,19 +6,19 @@ import (
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/message"
 	"github.com/mattermost/mattermost-server/v6/model"
 )
 
 type MattermostProvider struct {
-	channel       chan service.Message
+	channel       chan message.Message
 	httpClient    *mattermostmessages.HttpClient
 	mattermostBot bot.MattermostBot
 }
 
 func NewMattermostProvider(mattermostBot bot.MattermostBot) MattermostProvider {
 	var provider MattermostProvider
-	provider.channel = make(chan service.Message)
+	provider.channel = make(chan message.Message)
 	provider.httpClient = mattermostmessages.NewHttpClient(&http.Client{})
 	provider.mattermostBot = mattermostBot
 	return provider
@@ -37,7 +37,7 @@ func (m MattermostProvider) getMessageHandler(event *model.WebSocketEvent) {
 	}
 }
 
-func (m MattermostProvider) SendMessage(message service.Message) error {
+func (m MattermostProvider) SendMessage(message message.Message) error {
 	return m.httpClient.SendMessage(message, m.mattermostBot)
 }
 
@@ -59,6 +59,6 @@ func (m MattermostProvider) Run() {
 
 }
 
-func (m MattermostProvider) GetMessagesChannel() <-chan service.Message {
+func (m MattermostProvider) GetMessagesChannel() <-chan message.Message {
 	return m.channel
 }
