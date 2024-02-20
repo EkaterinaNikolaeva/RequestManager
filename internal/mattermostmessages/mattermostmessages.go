@@ -63,6 +63,14 @@ func (client *HttpClient) CheckMessageForJiraRequest(bytes string, mattermostBot
 	}
 }
 
+func (client *HttpClient) GetMessage(bytes string) (string, error) {
+	var post ResponsePost
+	err := json.Unmarshal([]byte(bytes), &post)
+	if err != nil {
+		return "", err
+	}
+	return post.Message, nil
+}
 func (client *HttpClient) makePostForCreation(post ResponsePost, mattermostBot bot.MattermostBot) {
 	log.Printf("Message: %s, make issue!", post.Message)
 	rootId := post.Id

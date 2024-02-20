@@ -6,7 +6,8 @@ import (
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/server"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostprovider"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
 )
 
 func main() {
@@ -18,5 +19,8 @@ func main() {
 		log.Fatalf("Error when opening config file: %q", err)
 	}
 	mattermostBot := bot.NewMattermostBot(config)
-	server.MakeServer(mattermostBot)
+	provider := mattermostprovider.NewMattermostProvider()
+	go provider.Run(mattermostBot)
+	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider)
+	taskFromMessagesCreator.Run()
 }
