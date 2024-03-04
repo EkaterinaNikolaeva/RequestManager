@@ -2,7 +2,6 @@ package mattermostprovider
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
@@ -11,15 +10,15 @@ import (
 )
 
 type MattermostProvider struct {
-	channel       chan message.Message
-	httpClient    *mattermostmessages.HttpClient
-	mattermostBot bot.MattermostBot
+	channel              chan message.Message
+	mattermostHttpClient *mattermostmessages.HttpClient
+	mattermostBot        bot.MattermostBot
 }
 
-func NewMattermostProvider(mattermostBot bot.MattermostBot) MattermostProvider {
+func NewMattermostProvider(mattermostBot bot.MattermostBot, httpClient *mattermostmessages.HttpClient) MattermostProvider {
 	var provider MattermostProvider
 	provider.channel = make(chan message.Message)
-	provider.httpClient = mattermostmessages.NewHttpClient(&http.Client{})
+	provider.mattermostHttpClient = httpClient
 	provider.mattermostBot = mattermostBot
 	return provider
 }
@@ -28,7 +27,7 @@ func (m MattermostProvider) getMessageHandler(event *model.WebSocketEvent) {
 	if event.GetData()["post"] == nil {
 		return
 	}
-	message, from_bot, err := m.httpClient.GetMessage(event.GetData()["post"].(string))
+	message, from_bot, err := mattermostmessages.GetMessage(event.GetData()["post"].(string))
 	if err != nil {
 		log.Printf("error when encoding message: %q", err)
 	}
@@ -38,7 +37,7 @@ func (m MattermostProvider) getMessageHandler(event *model.WebSocketEvent) {
 }
 
 func (m MattermostProvider) SendMessage(message message.Message) error {
-	return m.httpClient.SendMessage(message, m.mattermostBot)
+	return m.mattermostHttpClient.SendMessage(message, m.mattermostBot)
 }
 
 func (m MattermostProvider) Run() {

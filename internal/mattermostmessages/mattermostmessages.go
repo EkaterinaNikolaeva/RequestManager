@@ -58,7 +58,7 @@ func checkMessageFromBot(post ResponsePost) bool {
 	isBot, isBool := fromBot.(bool)
 	return ok && isBool && isBot || fromBot == "true"
 }
-func (client *HttpClient) GetMessage(bytes string) (message.Message, bool, error) {
+func GetMessage(bytes string) (message.Message, bool, error) {
 	var post ResponsePost
 	err := json.Unmarshal([]byte(bytes), &post)
 	if err != nil {
