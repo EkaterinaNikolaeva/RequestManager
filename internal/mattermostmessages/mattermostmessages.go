@@ -6,16 +6,22 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"regexp"
-	"strings"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/message"
 )
 
-type HttpClient http.Client
+type MattermostHttpClient struct {
+	httpClient      *http.Client
+	mattermostToken string
+	mattermostUrl   string
+}
 
-func NewHttpClient(client *http.Client) *HttpClient {
-	return (*HttpClient)(client)
+func NewHttpClient(client *http.Client, token string, url string) *MattermostHttpClient {
+	return &MattermostHttpClient{
+		httpClient:      client,
+		mattermostToken: token,
+		mattermostUrl:   url,
+	}
 }
 
 type RequestPost struct {
@@ -39,55 +45,65 @@ type ResponsePost struct {
 	OriginalId    string                 `json:"original_id,omitempty"`
 	Message       string                 `json:"message,omitempty"`
 	Type          string                 `json:"type,omitempty"`
-	Props         interface{}            `json:"props,omitempty"`
+	Props         map[string]interface{} `json:"props,omitempty"`
 	Hashtag       string                 `json:"hashtag,omitempty"`
 	PendingPostId string                 `json:"pending_post_id,omitempty"`
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`
 }
 
-var validMsg = regexp.MustCompile(`.*jira!.*`)
-
-func checkPatternInMessage(msg string) bool {
-	return validMsg.MatchString(strings.ToLower(msg))
-}
-
-func (client *HttpClient) CheckMessageForJiraRequest(bytes string, mattermostBot bot.MattermostBot) {
-	var post ResponsePost
-	err := json.Unmarshal([]byte(bytes), &post)
-	if err != nil {
-		log.Printf("Error when encode message %q", err)
-		return
-	}
-	if checkPatternInMessage(post.Message) {
-		client.makePostForCreation(post, mattermostBot)
-	}
-}
-
-func (client *HttpClient) makePostForCreation(post ResponsePost, mattermostBot bot.MattermostBot) {
-	log.Printf("Message: %s, make issue!", post.Message)
+func getFrom(post ResponsePost) string {
 	rootId := post.Id
 	if post.RootId != "" {
 		rootId = post.RootId
 	}
-	client.CreatePost(RequestPost{
-		Message:   "Create an issue. Link: ",
-		ChannelId: post.ChannelId,
-		RootId:    rootId,
-	}, mattermostBot.MattermostHttp, mattermostBot)
+	return rootId
 }
 
-func (client *HttpClient) CreatePost(post RequestPost, url string, bot bot.MattermostBot) error {
+func checkMessageFromBot(post ResponsePost) bool {
+	props := post.Props
+	fromBot, ok := props["from_bot"]
+	isBot, isBool := fromBot.(bool)
+	return ok && isBool && isBot || fromBot == "true"
+}
+
+func GetMessage(bytes string) (message.Message, error) {
+	var post ResponsePost
+	err := json.Unmarshal([]byte(bytes), &post)
+	if err != nil {
+		return message.Message{}, err
+	}
+	return message.Message{
+		MessageText:   post.Message,
+		ChannelId:     post.ChannelId,
+		RootMessageId: getFrom(post),
+		Author:        message.MessageAuthor{Id: post.UserId, IsBot: checkMessageFromBot(post)},
+	}, nil
+}
+
+func (client *MattermostHttpClient) SendMessage(message message.Message) error {
+	post := RequestPost{
+		Message:   message.MessageText,
+		ChannelId: message.ChannelId,
+		RootId:    message.RootMessageId,
+	}
+	return client.CreatePost(post)
+}
+
+func (client *MattermostHttpClient) CreatePost(post RequestPost) error {
 	bytesRepresentation, err := json.Marshal(post)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", url+"/api/v4/posts", bytes.NewBuffer(bytesRepresentation))
+	req, err := http.NewRequest("POST", client.mattermostUrl+"/api/v4/posts", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		return err
 	}
-	var bearer = "Bearer " + bot.Token
+	var bearer = "Bearer " + client.mattermostToken
 	req.Header.Add("Authorization", bearer)
-	resp, err := (*http.Client)(client).Do(req)
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
 	bytesResp, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
