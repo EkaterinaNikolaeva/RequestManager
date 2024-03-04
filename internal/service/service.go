@@ -42,9 +42,9 @@ func (s TaskFromMessagesCreator) Run() {
 		msg := <-messagesChannel
 		if s.messagesMatcher.MatchMessage(msg) {
 			s.messagesProvider.SendMessage(
-				message.Message{Message: "Make issue! Link: ",
-					Chat:      msg.Chat,
-					MessageId: msg.MessageId})
+				message.Message{MessageText: "Make issue! Link: ",
+					ChannelId:     msg.ChannelId,
+					RootMessageId: msg.RootMessageId})
 		}
 	}
 }

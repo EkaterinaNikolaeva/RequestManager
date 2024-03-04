@@ -68,17 +68,17 @@ func GetMessage(bytes string) (message.Message, bool, error) {
 		return message.Message{}, true, err
 	}
 	return message.Message{
-		Message:   post.Message,
-		Chat:      post.ChannelId,
-		MessageId: getFrom(post),
+		MessageText:   post.Message,
+		ChannelId:     post.ChannelId,
+		RootMessageId: getFrom(post),
 	}, false, nil
 }
 
 func (client *HttpClient) SendMessage(message message.Message, bot bot.MattermostBot) error {
 	post := RequestPost{
-		Message:   message.Message,
-		ChannelId: message.Chat,
-		RootId:    message.MessageId,
+		Message:   message.MessageText,
+		ChannelId: message.ChannelId,
+		RootId:    message.RootMessageId,
 	}
 	return client.CreatePost(post, bot.MattermostHttp, bot)
 }

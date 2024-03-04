@@ -24,7 +24,7 @@ func main() {
 	mattermostBot := bot.NewMattermostBot(config)
 	httpClientForMessanger := mattermostmessages.NewHttpClient(&http.Client{})
 	provider := mattermostprovider.NewMattermostProvider(mattermostBot, httpClientForMessanger)
-	matcher := messagesmatcher.MessagesMatcher{}
+	matcher := messagesmatcher.NewMessagesMatcher(config.MessagesPattern)
 	go provider.Run()
 	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, matcher)
 	taskFromMessagesCreator.Run()

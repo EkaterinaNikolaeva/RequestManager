@@ -8,10 +8,15 @@ import (
 )
 
 type MessagesMatcher struct {
+	templateMatcher string
 }
 
-var validMsg = regexp.MustCompile(`.*jira!.*`)
-
 func (m MessagesMatcher) MatchMessage(message message.Message) bool {
-	return validMsg.MatchString(strings.ToLower(message.Message))
+	isMatch, _ := regexp.MatchString(m.templateMatcher, strings.ToLower(message.MessageText))
+	return isMatch
+}
+
+func NewMessagesMatcher(templateMatcher string) MessagesMatcher {
+	messagesMatcher := MessagesMatcher{templateMatcher: templateMatcher}
+	return messagesMatcher
 }
