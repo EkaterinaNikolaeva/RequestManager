@@ -1,6 +1,7 @@
 package mattermostprovider
 
 import (
+	"context"
 	"log"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
@@ -37,7 +38,7 @@ func (m MattermostProvider) handleMessage(event *model.WebSocketEvent) {
 	m.channel <- message
 }
 
-func (m MattermostProvider) Run() {
+func (m MattermostProvider) Run(ctx context.Context) {
 	mattermostClient := model.NewAPIv4Client(m.mattermostBot.MattermostHttp)
 	mattermostClient.SetToken(m.mattermostBot.Token)
 	mattermostClient.MockSession(m.mattermostBot.Token)
@@ -48,11 +49,14 @@ func (m MattermostProvider) Run() {
 	webSocketClient.Listen()
 	for {
 		select {
+		case <-ctx.Done():
+			log.Printf("ctx is done, stop websocket mattermost client")
+			webSocketClient.Close()
+			return
 		case resp := <-webSocketClient.EventChannel:
 			m.handleMessage(resp)
 		}
 	}
-
 }
 
 func (m MattermostProvider) GetMessagesChannel() <-chan message.Message {

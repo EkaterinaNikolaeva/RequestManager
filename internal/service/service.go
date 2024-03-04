@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"log"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/message"
@@ -43,11 +44,14 @@ func NewTaskFromMessagesCreator(provider MessagesProvider, sender MessagesSender
 	}
 }
 
-func (s TaskFromMessagesCreator) Run() {
+func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 	messagesChannel := s.messagesProvider.GetMessagesChannel()
 	log.Println("Server started!")
 	for {
 		select {
+		case <-ctx.Done():
+			log.Printf("ctx is done, stop service task from message creation")
+			return
 		case msg := <-messagesChannel:
 			if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(msg) {
 				s.messagesSender.SendMessage(
