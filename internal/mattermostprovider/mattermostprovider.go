@@ -10,15 +10,13 @@ import (
 )
 
 type MattermostProvider struct {
-	channel              chan message.Message
-	mattermostHttpClient *mattermostmessages.HttpClient
-	mattermostBot        bot.MattermostBot
+	channel       chan message.Message
+	mattermostBot bot.MattermostBot
 }
 
-func NewMattermostProvider(mattermostBot bot.MattermostBot, httpClient *mattermostmessages.HttpClient) MattermostProvider {
+func NewMattermostProvider(mattermostBot bot.MattermostBot) MattermostProvider {
 	var provider MattermostProvider
 	provider.channel = make(chan message.Message)
-	provider.mattermostHttpClient = httpClient
 	provider.mattermostBot = mattermostBot
 	return provider
 }
@@ -37,10 +35,6 @@ func (m MattermostProvider) handleMessage(event *model.WebSocketEvent) {
 		return
 	}
 	m.channel <- message
-}
-
-func (m MattermostProvider) SendMessage(message message.Message) error {
-	return m.mattermostHttpClient.SendMessage(message, m.mattermostBot)
 }
 
 func (m MattermostProvider) Run() {

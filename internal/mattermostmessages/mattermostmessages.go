@@ -7,14 +7,21 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/message"
 )
 
-type HttpClient http.Client
+type MattermostHttpClient struct {
+	httpClient      *http.Client
+	mattermostToken string
+	mattermostUrl   string
+}
 
-func NewHttpClient(client *http.Client) *HttpClient {
-	return (*HttpClient)(client)
+func NewHttpClient(client *http.Client, token string, url string) *MattermostHttpClient {
+	return &MattermostHttpClient{
+		httpClient:      client,
+		mattermostToken: token,
+		mattermostUrl:   url,
+	}
 }
 
 type RequestPost struct {
@@ -58,6 +65,7 @@ func checkMessageFromBot(post ResponsePost) bool {
 	isBot, isBool := fromBot.(bool)
 	return ok && isBool && isBot || fromBot == "true"
 }
+
 func GetMessage(bytes string) (message.Message, error) {
 	var post ResponsePost
 	err := json.Unmarshal([]byte(bytes), &post)
@@ -72,27 +80,30 @@ func GetMessage(bytes string) (message.Message, error) {
 	}, nil
 }
 
-func (client *HttpClient) SendMessage(message message.Message, bot bot.MattermostBot) error {
+func (client *MattermostHttpClient) SendMessage(message message.Message) error {
 	post := RequestPost{
 		Message:   message.MessageText,
 		ChannelId: message.ChannelId,
 		RootId:    message.RootMessageId,
 	}
-	return client.CreatePost(post, bot.MattermostHttp, bot)
+	return client.CreatePost(post)
 }
 
-func (client *HttpClient) CreatePost(post RequestPost, url string, bot bot.MattermostBot) error {
+func (client *MattermostHttpClient) CreatePost(post RequestPost) error {
 	bytesRepresentation, err := json.Marshal(post)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", url+"/api/v4/posts", bytes.NewBuffer(bytesRepresentation))
+	req, err := http.NewRequest("POST", client.mattermostUrl+"/api/v4/posts", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		return err
 	}
-	var bearer = "Bearer " + bot.Token
+	var bearer = "Bearer " + client.mattermostToken
 	req.Header.Add("Authorization", bearer)
-	resp, err := (*http.Client)(client).Do(req)
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
 	bytesResp, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err

@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,8 +25,8 @@ func TestSendMessages(t *testing.T) {
 	}))
 	defer server.Close()
 	client := server.Client()
-	NewHttpClient(client).CreatePost(RequestPost{
+	NewHttpClient(client, server.URL, "").CreatePost(RequestPost{
 		Message:   testMsg,
 		ChannelId: testChannelId,
-	}, server.URL, bot.MattermostBot{})
+	})
 }
