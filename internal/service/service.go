@@ -27,22 +27,25 @@ type TaskFromMessagesCreator struct {
 	messagesProvider MessagesProvider
 	taskCreator      TaskCreator
 	messagesMatcher  MessagesMatcher
+	messageReply     string
 }
 
-func NewTaskFromMessagesCreator(provider MessagesProvider, matcher MessagesMatcher) TaskFromMessagesCreator {
+func NewTaskFromMessagesCreator(provider MessagesProvider, matcher MessagesMatcher, messageStandardReply string) TaskFromMessagesCreator {
 	return TaskFromMessagesCreator{
 		messagesProvider: provider,
 		messagesMatcher:  matcher,
+		messageReply:     messageStandardReply,
 	}
 }
+
 func (s TaskFromMessagesCreator) Run() {
 	messagesChannel := s.messagesProvider.GetMessagesChannel()
 	log.Println("Server started!")
 	for {
 		msg := <-messagesChannel
-		if s.messagesMatcher.MatchMessage(msg) {
+		if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(msg) {
 			s.messagesProvider.SendMessage(
-				message.Message{MessageText: "Make issue! Link: ",
+				message.Message{MessageText: s.messageReply,
 					ChannelId:     msg.ChannelId,
 					RootMessageId: msg.RootMessageId})
 		}

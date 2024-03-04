@@ -14,6 +14,7 @@ type Config struct {
 	MattermostWebsocket string `yaml:"mattermost_websocket,omitempty"`
 	TeamName            string `yaml:"team_name"`
 	MessagesPattern     string `yaml:"messages_pattern"`
+	MessageReply        string `yaml:"message_reply"`
 }
 
 func (c *Config) getEnvVars() {

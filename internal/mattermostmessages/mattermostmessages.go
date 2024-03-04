@@ -58,20 +58,18 @@ func checkMessageFromBot(post ResponsePost) bool {
 	isBot, isBool := fromBot.(bool)
 	return ok && isBool && isBot || fromBot == "true"
 }
-func GetMessage(bytes string) (message.Message, bool, error) {
+func GetMessage(bytes string) (message.Message, error) {
 	var post ResponsePost
 	err := json.Unmarshal([]byte(bytes), &post)
 	if err != nil {
-		return message.Message{}, false, err
-	}
-	if checkMessageFromBot(post) {
-		return message.Message{}, true, err
+		return message.Message{}, err
 	}
 	return message.Message{
 		MessageText:   post.Message,
 		ChannelId:     post.ChannelId,
 		RootMessageId: getFrom(post),
-	}, false, nil
+		Author:        message.MessageAuthor{Id: post.UserId, IsBot: checkMessageFromBot(post)},
+	}, nil
 }
 
 func (client *HttpClient) SendMessage(message message.Message, bot bot.MattermostBot) error {

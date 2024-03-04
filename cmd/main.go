@@ -26,6 +26,6 @@ func main() {
 	provider := mattermostprovider.NewMattermostProvider(mattermostBot, httpClientForMessanger)
 	matcher := messagesmatcher.NewMessagesMatcher(config.MessagesPattern)
 	go provider.Run()
-	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, matcher)
+	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, matcher, config.MessageReply)
 	taskFromMessagesCreator.Run()
 }

@@ -23,17 +23,20 @@ func NewMattermostProvider(mattermostBot bot.MattermostBot, httpClient *mattermo
 	return provider
 }
 
-func (m MattermostProvider) getMessageHandler(event *model.WebSocketEvent) {
-	if event.GetData()["post"] == nil {
+func checkRequestPostType(event *model.WebSocketEvent) bool {
+	return event.GetData()["post"] != nil
+}
+
+func (m MattermostProvider) handleMessage(event *model.WebSocketEvent) {
+	if !checkRequestPostType(event) {
 		return
 	}
-	message, from_bot, err := mattermostmessages.GetMessage(event.GetData()["post"].(string))
+	message, err := mattermostmessages.GetMessage(event.GetData()["post"].(string))
 	if err != nil {
 		log.Printf("error when encoding message: %q", err)
+		return
 	}
-	if !from_bot {
-		m.channel <- message
-	}
+	m.channel <- message
 }
 
 func (m MattermostProvider) SendMessage(message message.Message) error {
@@ -52,7 +55,7 @@ func (m MattermostProvider) Run() {
 	for {
 		select {
 		case resp := <-webSocketClient.EventChannel:
-			m.getMessageHandler(resp)
+			m.handleMessage(resp)
 		}
 	}
 
