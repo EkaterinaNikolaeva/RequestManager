@@ -5,11 +5,8 @@ import (
 	"log"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/message"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/task"
 )
-
-type Task struct {
-	Text string
-}
 
 type MessagesProvider interface {
 	GetMessagesChannel() <-chan message.Message
@@ -20,7 +17,7 @@ type MessagesSender interface {
 }
 
 type TaskCreator interface {
-	CreateTask(task Task)
+	CreateTask(task task.Task)
 }
 
 type MessagesMatcher interface {
@@ -28,19 +25,26 @@ type MessagesMatcher interface {
 }
 
 type TaskFromMessagesCreator struct {
-	messagesProvider MessagesProvider
-	messagesSender   MessagesSender
-	taskCreator      TaskCreator
-	messagesMatcher  MessagesMatcher
-	messageReply     string
+	messagesProvider    MessagesProvider
+	messagesSender      MessagesSender
+	taskCreator         TaskCreator
+	messagesMatcher     MessagesMatcher
+	messageReply        string
+	taskStandardProject string
+	taskStandardType    string
 }
 
-func NewTaskFromMessagesCreator(provider MessagesProvider, sender MessagesSender, matcher MessagesMatcher, messageStandardReply string) TaskFromMessagesCreator {
+func NewTaskFromMessagesCreator(provider MessagesProvider, sender MessagesSender, matcher MessagesMatcher,
+	taskCreator TaskCreator, messageStandardReply string,
+	taskStandardProject string, taskStandardType string) TaskFromMessagesCreator {
 	return TaskFromMessagesCreator{
-		messagesProvider: provider,
-		messagesSender:   sender,
-		messagesMatcher:  matcher,
-		messageReply:     messageStandardReply,
+		messagesProvider:    provider,
+		messagesSender:      sender,
+		messagesMatcher:     matcher,
+		messageReply:        messageStandardReply,
+		taskCreator:         taskCreator,
+		taskStandardProject: taskStandardProject,
+		taskStandardType:    taskStandardType,
 	}
 }
 
@@ -58,6 +62,13 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 					message.Message{MessageText: s.messageReply,
 						ChannelId:     msg.ChannelId,
 						RootMessageId: msg.RootMessageId})
+				s.taskCreator.CreateTask(
+					task.Task{
+						Name:        "From mattermost",
+						Description: msg.MessageText,
+						Project:     s.taskStandardProject,
+						Type:        s.taskStandardType,
+					})
 			}
 		}
 	}
