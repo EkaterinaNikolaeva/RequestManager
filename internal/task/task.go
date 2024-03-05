@@ -5,4 +5,5 @@ type Task struct {
 	Description string
 	Type        string
 	Project     string
+	Link        string
 }

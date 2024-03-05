@@ -49,7 +49,13 @@ type JiraTaskCreationIssueType struct {
 	Name string `json:"name"`
 }
 
-func (client *JiraHttpClient) CreateIssue(task task.Task) error {
+type JiraTaskCreationResponse struct {
+	Id   string `json:"id"`
+	Key  string `json:"key"`
+	Self string `json:"self"`
+}
+
+func (client *JiraHttpClient) CreateIssue(task task.Task) (task.Task, error) {
 	issue := JiraTaskCreationRequest{
 		Fields: JiraTaskCreationFields{
 			Project: JiraTaskCreationProject{
@@ -62,30 +68,40 @@ func (client *JiraHttpClient) CreateIssue(task task.Task) error {
 			},
 		},
 	}
-	return client.makeRequestCreationTask(issue)
+	link, err := client.makeRequestCreationTask(issue)
+	task.Link = link
+	return task, err
 }
 
-func (client *JiraHttpClient) makeRequestCreationTask(task JiraTaskCreationRequest) error {
+func (client *JiraHttpClient) getIssueLink(bytes []byte, task JiraTaskCreationRequest) (string, error) {
+	var response JiraTaskCreationResponse
+	err := json.Unmarshal(bytes, &response)
+	if err != nil {
+		return "", err
+	}
+	link := client.url + "/projects/" + task.Fields.Project.Key + "/issues/" + response.Key
+	return link, nil
+}
+
+func (client *JiraHttpClient) makeRequestCreationTask(task JiraTaskCreationRequest) (string, error) {
 	bytesRepresentation, err := json.Marshal(task)
 	if err != nil {
-		return err
+		return "", err
 	}
 	req, err := http.NewRequest("POST", client.url+"/rest/api/2/issue/", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
-		return err
+		return "", err
 	}
-	log.Println(bytes.NewBuffer(bytesRepresentation))
-	basic := "Basic " + client.authorizationCode
-	req.Header.Add("Authorization", basic)
+	req.Header.Add("Authorization", "Basic "+client.authorizationCode)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
-		return err
+		return "", err
 	}
 	bytesResp, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return "", err
 	}
 	log.Printf("Jira create task: %s", bytesResp)
-	return nil
+	return client.getIssueLink(bytesResp, task)
 }

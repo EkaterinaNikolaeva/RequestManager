@@ -17,7 +17,7 @@ type MessagesSender interface {
 }
 
 type TaskCreator interface {
-	CreateTask(task task.Task)
+	CreateTask(task task.Task) (task.Task, error)
 }
 
 type MessagesMatcher interface {
@@ -58,17 +58,23 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 			return
 		case msg := <-messagesChannel:
 			if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(msg) {
-				s.messagesSender.SendMessage(
-					message.Message{MessageText: s.messageReply,
-						ChannelId:     msg.ChannelId,
-						RootMessageId: msg.RootMessageId})
-				s.taskCreator.CreateTask(
+				task, err := s.taskCreator.CreateTask(
 					task.Task{
 						Name:        "From mattermost",
 						Description: msg.MessageText,
 						Project:     s.taskStandardProject,
 						Type:        s.taskStandardType,
 					})
+				if err != nil {
+					log.Printf("error when create task %q", err)
+				}
+				err = s.messagesSender.SendMessage(
+					message.Message{MessageText: s.messageReply + task.Link,
+						ChannelId:     msg.ChannelId,
+						RootMessageId: msg.RootMessageId})
+				if err != nil {
+					log.Printf("error when send reply %q", err)
+				}
 			}
 		}
 	}
