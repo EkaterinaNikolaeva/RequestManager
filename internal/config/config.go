@@ -15,10 +15,17 @@ type Config struct {
 	TeamName            string `yaml:"team_name"`
 	MessagesPattern     string `yaml:"messages_pattern"`
 	MessageReply        string `yaml:"message_reply"`
+	JiraBotUsername     string `yaml:"env_jira_bot_username"`
+	JiraBotPassword     string `yaml:"env_jira_bot_password"`
+	JiraProject         string `yaml:"jira_project"`
+	JiraIssueType       string `yaml:"jira_issue_type"`
+	JiraBaseUrl         string `yaml:"jira_base_url"`
 }
 
 func (c *Config) getEnvVars() {
 	c.MattermostToken = os.Getenv(c.MattermostToken)
+	c.JiraBotUsername = os.Getenv(c.JiraBotUsername)
+	c.JiraBotPassword = os.Getenv(c.JiraBotPassword)
 }
 
 var validHttp = regexp.MustCompile(`http[s]?://.*`)
@@ -28,7 +35,7 @@ func (c *Config) validateConfig() error {
 	if !validWs.MatchString(c.MattermostWebsocket) {
 		return errors.New("incorrect websocket server")
 	}
-	if !validHttp.MatchString(c.MattermostHttp) {
+	if !validHttp.MatchString(c.MattermostHttp) || !validHttp.MatchString(c.JiraBaseUrl) {
 		return errors.New("incorrect http server")
 	}
 	if c.MattermostToken == "" {

@@ -1,4 +1,4 @@
-package mattermostmessages
+package mattermosthttpclient
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +18,7 @@ func TestSendMessages(t *testing.T) {
 		bufSize := 1024
 		buffer := make([]byte, bufSize)
 		length, _ := req.Body.Read(buffer)
-		var post RequestPost
+		var post mattermostmessages.RequestPost
 		json.Unmarshal(buffer[:length], &post)
 		assert.Equal(t, post.ChannelId, testChannelId)
 		assert.Equal(t, post.Message, testMsg)
@@ -25,7 +26,7 @@ func TestSendMessages(t *testing.T) {
 	}))
 	defer server.Close()
 	client := server.Client()
-	NewHttpClient(client, server.URL, "").CreatePost(RequestPost{
+	NewHttpClient(client, server.URL, "").CreatePost(mattermostmessages.RequestPost{
 		Message:   testMsg,
 		ChannelId: testChannelId,
 	})

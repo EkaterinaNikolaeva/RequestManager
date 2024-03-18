@@ -1,28 +1,10 @@
 package mattermostmessages
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
-	"log"
-	"net/http"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/message"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 )
-
-type MattermostHttpClient struct {
-	httpClient      *http.Client
-	mattermostToken string
-	mattermostUrl   string
-}
-
-func NewHttpClient(client *http.Client, token string, url string) *MattermostHttpClient {
-	return &MattermostHttpClient{
-		httpClient:      client,
-		mattermostToken: token,
-		mattermostUrl:   url,
-	}
-}
 
 type RequestPost struct {
 	ChannelId string                 `json:"channel_id"`
@@ -78,36 +60,4 @@ func GetMessage(bytes string) (message.Message, error) {
 		RootMessageId: getFrom(post),
 		Author:        message.MessageAuthor{Id: post.UserId, IsBot: checkMessageFromBot(post)},
 	}, nil
-}
-
-func (client *MattermostHttpClient) SendMessage(message message.Message) error {
-	post := RequestPost{
-		Message:   message.MessageText,
-		ChannelId: message.ChannelId,
-		RootId:    message.RootMessageId,
-	}
-	return client.CreatePost(post)
-}
-
-func (client *MattermostHttpClient) CreatePost(post RequestPost) error {
-	bytesRepresentation, err := json.Marshal(post)
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequest("POST", client.mattermostUrl+"/api/v4/posts", bytes.NewBuffer(bytesRepresentation))
-	if err != nil {
-		return err
-	}
-	var bearer = "Bearer " + client.mattermostToken
-	req.Header.Add("Authorization", bearer)
-	resp, err := client.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	bytesResp, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	log.Printf("MattermostBot create post: %s", bytesResp)
-	return nil
 }

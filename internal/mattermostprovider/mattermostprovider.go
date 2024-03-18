@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/message"
 	"github.com/mattermost/mattermost-server/v6/model"
 )
 
