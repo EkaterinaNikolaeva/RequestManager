@@ -30,7 +30,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	mattermostBot := bot.NewMattermostBot(config)
-	jiraHttpClient := jiratasks.NewJiraHttpClient(&http.Client{}, config.JiraUrl, config.JiraBotUsername, config.JiraBotPassword)
+	jiraHttpClient := jiratasks.NewJiraHttpClient(&http.Client{}, config.JiraBaseUrl, config.JiraBotUsername, config.JiraBotPassword)
 	jiraTaskCreator := jirataskcreator.NewJiraTaskCreator(jiraHttpClient)
 	httpClientForMessanger := mattermostmessages.NewHttpClient(&http.Client{}, mattermostBot.Token, config.MattermostHttp)
 	provider := mattermostprovider.NewMattermostProvider(mattermostBot)

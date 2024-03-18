@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/message"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/task"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
 )
 
 type MessagesProvider interface {
@@ -17,7 +17,7 @@ type MessagesSender interface {
 }
 
 type TaskCreator interface {
-	CreateTask(task task.Task) (task.Task, error)
+	CreateTask(task task.TaskCreateRequest) (task.TaskCreated, error)
 }
 
 type MessagesMatcher interface {
@@ -25,26 +25,26 @@ type MessagesMatcher interface {
 }
 
 type TaskFromMessagesCreator struct {
-	messagesProvider    MessagesProvider
-	messagesSender      MessagesSender
-	taskCreator         TaskCreator
-	messagesMatcher     MessagesMatcher
-	messageReply        string
-	taskStandardProject string
-	taskStandardType    string
+	messagesProvider   MessagesProvider
+	messagesSender     MessagesSender
+	taskCreator        TaskCreator
+	messagesMatcher    MessagesMatcher
+	messageReply       string
+	taskDefaultProject string
+	taskDefaultType    string
 }
 
 func NewTaskFromMessagesCreator(provider MessagesProvider, sender MessagesSender, matcher MessagesMatcher,
-	taskCreator TaskCreator, messageStandardReply string,
-	taskStandardProject string, taskStandardType string) TaskFromMessagesCreator {
+	taskCreator TaskCreator, messageDefaultReply string,
+	taskDefaultProject string, taskDefaultType string) TaskFromMessagesCreator {
 	return TaskFromMessagesCreator{
-		messagesProvider:    provider,
-		messagesSender:      sender,
-		messagesMatcher:     matcher,
-		messageReply:        messageStandardReply,
-		taskCreator:         taskCreator,
-		taskStandardProject: taskStandardProject,
-		taskStandardType:    taskStandardType,
+		messagesProvider:   provider,
+		messagesSender:     sender,
+		messagesMatcher:    matcher,
+		messageReply:       messageDefaultReply,
+		taskCreator:        taskCreator,
+		taskDefaultProject: taskDefaultProject,
+		taskDefaultType:    taskDefaultType,
 	}
 }
 
@@ -59,14 +59,15 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 		case msg := <-messagesChannel:
 			if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(msg) {
 				task, err := s.taskCreator.CreateTask(
-					task.Task{
+					task.TaskCreateRequest{
 						Name:        "From mattermost",
 						Description: msg.MessageText,
-						Project:     s.taskStandardProject,
-						Type:        s.taskStandardType,
+						Project:     s.taskDefaultProject,
+						Type:        s.taskDefaultType,
 					})
 				if err != nil {
 					log.Printf("error when create task %q", err)
+					continue
 				}
 				err = s.messagesSender.SendMessage(
 					message.Message{MessageText: s.messageReply + task.Link,

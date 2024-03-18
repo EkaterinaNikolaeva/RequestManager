@@ -7,8 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/task"
 )
 
 func basicAuth(username string, password string) string {
@@ -17,14 +15,14 @@ func basicAuth(username string, password string) string {
 }
 
 type JiraHttpClient struct {
-	url               string
+	baseUrl           string
 	httpClient        *http.Client
 	authorizationCode string
 }
 
 func NewJiraHttpClient(httpClient *http.Client, url string, username string, password string) JiraHttpClient {
 	return JiraHttpClient{
-		url:               url,
+		baseUrl:           url,
 		httpClient:        httpClient,
 		authorizationCode: basicAuth(username, password),
 	}
@@ -55,40 +53,22 @@ type JiraTaskCreationResponse struct {
 	Self string `json:"self"`
 }
 
-func (client *JiraHttpClient) CreateIssue(task task.Task) (task.Task, error) {
-	issue := JiraTaskCreationRequest{
-		Fields: JiraTaskCreationFields{
-			Project: JiraTaskCreationProject{
-				Key: task.Project,
-			},
-			Summary:     task.Name,
-			Description: task.Description,
-			IssueType: JiraTaskCreationIssueType{
-				Name: task.Type,
-			},
-		},
-	}
-	link, err := client.makeRequestCreationTask(issue)
-	task.Link = link
-	return task, err
-}
-
 func (client *JiraHttpClient) getIssueLink(bytes []byte, task JiraTaskCreationRequest) (string, error) {
 	var response JiraTaskCreationResponse
 	err := json.Unmarshal(bytes, &response)
 	if err != nil {
 		return "", err
 	}
-	link := client.url + "/projects/" + task.Fields.Project.Key + "/issues/" + response.Key
+	link := client.baseUrl + "/projects/" + task.Fields.Project.Key + "/issues/" + response.Key
 	return link, nil
 }
 
-func (client *JiraHttpClient) makeRequestCreationTask(task JiraTaskCreationRequest) (string, error) {
+func (client *JiraHttpClient) CreateTask(task JiraTaskCreationRequest) (string, error) {
 	bytesRepresentation, err := json.Marshal(task)
 	if err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest("POST", client.url+"/rest/api/2/issue/", bytes.NewBuffer(bytesRepresentation))
+	req, err := http.NewRequest("POST", client.baseUrl+"/rest/api/2/issue/", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		return "", err
 	}

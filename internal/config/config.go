@@ -19,7 +19,7 @@ type Config struct {
 	JiraBotPassword     string `yaml:"env_jira_bot_password"`
 	JiraProject         string `yaml:"jira_project"`
 	JiraIssueType       string `yaml:"jira_issue_type"`
-	JiraUrl             string `yaml:"jira_url"`
+	JiraBaseUrl         string `yaml:"jira_base_url"`
 }
 
 func (c *Config) getEnvVars() {
@@ -35,7 +35,7 @@ func (c *Config) validateConfig() error {
 	if !validWs.MatchString(c.MattermostWebsocket) {
 		return errors.New("incorrect websocket server")
 	}
-	if !validHttp.MatchString(c.MattermostHttp) || !validHttp.MatchString(c.JiraUrl) {
+	if !validHttp.MatchString(c.MattermostHttp) || !validHttp.MatchString(c.JiraBaseUrl) {
 		return errors.New("incorrect http server")
 	}
 	if c.MattermostToken == "" {

@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/message"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 )
 
 type MessagesMatcher struct {
