@@ -1,15 +1,16 @@
 package mattermostsender
 
 import (
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
 )
 
 type MattermostSender struct {
-	mattermostHttpClient *mattermostmessages.MattermostHttpClient
+	mattermostHttpClient *mattermosthttpclient.MattermostHttpClient
 }
 
-func NewMattermostSender(httpClient *mattermostmessages.MattermostHttpClient) MattermostSender {
+func NewMattermostSender(httpClient *mattermosthttpclient.MattermostHttpClient) MattermostSender {
 	return MattermostSender{
 		mattermostHttpClient: httpClient,
 	}

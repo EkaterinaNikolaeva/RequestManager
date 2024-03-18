@@ -1,15 +1,16 @@
 package jirataskcreator
 
 import (
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiratasks"
 )
 
 type JiraTaskCreator struct {
-	jiraHttpClient jiratasks.JiraHttpClient
+	jiraHttpClient jirahttpclient.JiraHttpClient
 }
 
-func NewJiraTaskCreator(jiraHttpClient jiratasks.JiraHttpClient) JiraTaskCreator {
+func NewJiraTaskCreator(jiraHttpClient jirahttpclient.JiraHttpClient) JiraTaskCreator {
 	return JiraTaskCreator{
 		jiraHttpClient: jiraHttpClient,
 	}
