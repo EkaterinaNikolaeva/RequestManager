@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSendMessages(t *testing.T) {
+func TestCreateIssue(t *testing.T) {
 	summary := "Some summary"
 	description := "More about issue"
 	project := "PROJECT"
