@@ -19,20 +19,23 @@ func TestLoadConfigNoSuchFile(t *testing.T) {
 	}
 }
 
-func makeConfigData(envMattermostToken string, mattermostHttp string, mattermostWebsocket string, teamName string) string {
+func makeConfigData(envMattermostToken string, mattermostHttp string, mattermostWebsocket string, teamName string, jiraHttp string) string {
 	configData := "env_mattermost_token: " + envMattermostToken + "\n"
 	configData += "mattermost_http: " + mattermostHttp + "\n"
 	configData += "mattermost_websocket: " + mattermostWebsocket + "\n"
 	configData += "team_name: " + teamName + "\n"
+	configData += "jira_base_url: " + jiraHttp + "\n"
 	return configData
 }
 
 func TestLoadConfig(t *testing.T) {
 	envMattermostToken := "token"
+	t.Setenv(envMattermostToken, envMattermostToken)
 	mattermostHttp := "http://localhost:0000"
+	jiraHttp := "http://localhost:0000"
 	mattermostWebsocket := "ws://localhost:0000"
 	teamName := "team"
-	configData := makeConfigData(envMattermostToken, mattermostHttp, mattermostWebsocket, teamName)
+	configData := makeConfigData(envMattermostToken, mattermostHttp, mattermostWebsocket, teamName, jiraHttp)
 	configFile, err := ioutil.TempFile("", "config-*.txt")
 	if err == nil {
 		configFile.Write([]byte(configData))
@@ -52,15 +55,16 @@ func TestIncorrectConfig(t *testing.T) {
 	configFile, err := ioutil.TempFile("", "config-*.txt")
 	fileName := configFile.Name()
 	if err == nil {
-		configData := makeConfigData("token", "https://localhost:0000", "ws://localhost:0000", "team")
+		configData := makeConfigData("token", "https://localhost:0000", "ws://localhost:0000", "team", "https://localhost:0000")
 		configFile.WriteString(configData)
 		configFile.Close()
 		_, err := LoadConfig(configFile.Name())
-		assert.Equal(t, nil, err)
+		assert.NotEqual(t, nil, err)
+		assert.EqualError(t, err, "incorrect mattermost token")
 		configFile.Close()
 
 		configFile, _ = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 755)
-		configData = makeConfigData("token", "httpss://localhost:0000", "ws://localhost:0000", "team")
+		configData = makeConfigData("token", "httpss://localhost:0000", "ws://localhost:0000", "team", "http://localhost:0000")
 		configFile.Write([]byte(configData))
 		configFile.Close()
 		_, err = LoadConfig(configFile.Name())
@@ -69,7 +73,7 @@ func TestIncorrectConfig(t *testing.T) {
 		configFile.Close()
 
 		configFile, _ = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 755)
-		configData = makeConfigData("token", "https://localhost:0000", "ws:/localhost:0000", "team")
+		configData = makeConfigData("token", "https://localhost:0000", "ws:/localhost:0000", "team", "https://localhost:0000")
 		configFile.Write([]byte(configData))
 		configFile.Close()
 		_, err = LoadConfig(configFile.Name())
