@@ -26,8 +26,8 @@ func TestSendMessages(t *testing.T) {
 	}))
 	defer server.Close()
 	client := server.Client()
-	NewHttpClient(client, server.URL, "").CreatePost(mattermostmessages.RequestPost{
+	assert.Nil(t, NewHttpClient(client, "", server.URL).CreatePost(mattermostmessages.RequestPost{
 		Message:   testMsg,
 		ChannelId: testChannelId,
-	})
+	}))
 }

@@ -36,7 +36,7 @@ func TestCreateIssue(t *testing.T) {
 	defer server.Close()
 	client := server.Client()
 	jiraClient := NewJiraHttpClient(client, server.URL, "", "")
-	jiraClient.CreateTask(jiratasks.JiraTaskCreationRequest{
+	_, err := jiraClient.CreateTask(jiratasks.JiraTaskCreationRequest{
 		Fields: jiratasks.JiraTaskCreationFields{
 			Project: jiratasks.JiraTaskCreationProject{
 				Key: project,
@@ -48,4 +48,5 @@ func TestCreateIssue(t *testing.T) {
 			},
 		},
 	})
+	assert.Nil(t, err)
 }
