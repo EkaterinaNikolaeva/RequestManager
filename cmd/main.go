@@ -35,9 +35,12 @@ func main() {
 	httpClientForMessanger := mattermosthttpclient.NewHttpClient(&http.Client{}, mattermostBot.Token, config.MattermostHttp)
 	provider := mattermostprovider.NewMattermostProvider(mattermostBot)
 	sender := mattermostsender.NewMattermostSender(httpClientForMessanger)
-	matcher := messagesmatcher.NewMessagesMatcher(config.MessagesPattern)
+	matcher, err := messagesmatcher.NewMessagesMatcher(config.MessagesPattern)
+	if err != nil {
+		log.Fatalf("Unsuccessful start: %q", err)
+	}
 	go provider.Run(ctx)
 	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
-		config.MessageReply, config.JiraProject, config.JiraIssueType)
+		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType)
 	taskFromMessagesCreator.Run(ctx)
 }

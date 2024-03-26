@@ -1,6 +1,7 @@
 package messagesmatcher
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -8,15 +9,18 @@ import (
 )
 
 type MessagesMatcher struct {
-	templateMatcher string
+	regexpMatcher *regexp.Regexp
 }
 
 func (m MessagesMatcher) MatchMessage(message message.Message) bool {
-	isMatch, _ := regexp.MatchString(m.templateMatcher, strings.ToLower(message.MessageText))
+	isMatch := m.regexpMatcher.MatchString(strings.ToLower(message.MessageText))
 	return isMatch
 }
 
-func NewMessagesMatcher(templateMatcher string) MessagesMatcher {
-	messagesMatcher := MessagesMatcher{templateMatcher: templateMatcher}
-	return messagesMatcher
+func NewMessagesMatcher(templateMatcher string) (MessagesMatcher, error) {
+	regexpMatcher, err := regexp.Compile(templateMatcher)
+	if err != nil {
+		return MessagesMatcher{}, fmt.Errorf("error when compile regexp: %q", err)
+	}
+	return MessagesMatcher{regexpMatcher: regexpMatcher}, nil
 }
