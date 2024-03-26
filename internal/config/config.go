@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"html/template"
 	"os"
 	"regexp"
 
@@ -9,23 +10,33 @@ import (
 )
 
 type Config struct {
-	MattermostToken     string `yaml:"env_mattermost_token"`
-	MattermostHttp      string `yaml:"mattermost_http"`
-	MattermostWebsocket string `yaml:"mattermost_websocket,omitempty"`
-	TeamName            string `yaml:"team_name"`
-	MessagesPattern     string `yaml:"messages_pattern"`
-	MessageReply        string `yaml:"message_reply"`
-	JiraBotUsername     string `yaml:"env_jira_bot_username"`
-	JiraBotPassword     string `yaml:"env_jira_bot_password"`
-	JiraProject         string `yaml:"jira_project"`
-	JiraIssueType       string `yaml:"jira_issue_type"`
-	JiraBaseUrl         string `yaml:"jira_base_url"`
+	MattermostToken         string `yaml:"env_mattermost_token"`
+	MattermostHttp          string `yaml:"mattermost_http"`
+	MattermostWebsocket     string `yaml:"mattermost_websocket,omitempty"`
+	TeamName                string `yaml:"team_name"`
+	MessagesPattern         string `yaml:"messages_pattern"`
+	MessageReply            string `yaml:"message_reply"`
+	JiraBotUsername         string `yaml:"env_jira_bot_username"`
+	JiraBotPassword         string `yaml:"env_jira_bot_password"`
+	JiraProject             string `yaml:"jira_project"`
+	JiraIssueType           string `yaml:"jira_issue_type"`
+	JiraBaseUrl             string `yaml:"jira_base_url"`
+	MessagesPatternTemplate *template.Template
 }
 
 func (c *Config) getEnvVars() {
 	c.MattermostToken = os.Getenv(c.MattermostToken)
 	c.JiraBotUsername = os.Getenv(c.JiraBotUsername)
 	c.JiraBotPassword = os.Getenv(c.JiraBotPassword)
+}
+
+func (c *Config) compileTemplates() error {
+	tmpl, err := template.New("test").Parse(c.MessageReply)
+	if err != nil {
+		return err
+	}
+	c.MessagesPatternTemplate = tmpl
+	return nil
 }
 
 var validHttp = regexp.MustCompile(`http[s]?://.*`)
@@ -56,6 +67,10 @@ func LoadConfig(fileName string) (Config, error) {
 	}
 	config.getEnvVars()
 	err = config.validateConfig()
+	if err != nil {
+		return Config{}, err
+	}
+	config.compileTemplates()
 	if err != nil {
 		return Config{}, err
 	}

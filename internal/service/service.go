@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"html/template"
 	"log"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
@@ -29,13 +31,13 @@ type TaskFromMessagesCreator struct {
 	messagesSender     MessagesSender
 	taskCreator        TaskCreator
 	messagesMatcher    MessagesMatcher
-	messageReply       string
+	messageReply       *template.Template
 	taskDefaultProject string
 	taskDefaultType    string
 }
 
 func NewTaskFromMessagesCreator(provider MessagesProvider, sender MessagesSender, matcher MessagesMatcher,
-	taskCreator TaskCreator, messageDefaultReply string,
+	taskCreator TaskCreator, messageDefaultReply *template.Template,
 	taskDefaultProject string, taskDefaultType string) TaskFromMessagesCreator {
 	return TaskFromMessagesCreator{
 		messagesProvider:   provider,
@@ -69,8 +71,13 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 					log.Printf("error when create task %q", err)
 					continue
 				}
+				var reply bytes.Buffer
+				err = s.messageReply.Execute(&reply, task)
+				if err != nil {
+					log.Printf("error when execute reply template %q", err)
+				}
 				err = s.messagesSender.SendMessage(
-					message.Message{MessageText: s.messageReply + task.Link,
+					message.Message{MessageText: reply.String(),
 						ChannelId:     msg.ChannelId,
 						RootMessageId: msg.RootMessageId})
 				if err != nil {

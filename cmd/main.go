@@ -41,6 +41,6 @@ func main() {
 	}
 	go provider.Run(ctx)
 	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
-		config.MessageReply, config.JiraProject, config.JiraIssueType)
+		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType)
 	taskFromMessagesCreator.Run(ctx)
 }
