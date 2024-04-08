@@ -75,6 +75,7 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 				err = s.messageReply.Execute(&reply, task)
 				if err != nil {
 					log.Printf("error when execute reply template %q", err)
+					continue
 				}
 				err = s.messagesSender.SendMessage(
 					message.Message{MessageText: reply.String(),

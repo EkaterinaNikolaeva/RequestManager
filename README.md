@@ -7,7 +7,8 @@ An example of the config is in the file `configs/config.yml`
 * `env_jira_bot_username` и `env_jira_bot_password` - the names of the environment variables containing the username and password of the bot's account in jira
 * `jira_project`, `jira_issue_type` allows you to configure the task creation parameters in jira
 * `messages_pattern` - the regular expression that will determine the need to create an issue
-* `message_reply` - the default response of the bot in the messenger
+* `message_reply` - template for generating the default response of the bot in the messenger.
+
 ## Installation
 * Install `mattermost`, `jira` 
 * Create bot accounts

@@ -11,10 +11,18 @@ import (
 )
 
 func TestCreateIssue(t *testing.T) {
-	summary := "Some summary"
-	description := "More about issue"
-	project := "PROJECT"
-	issueType := "Bug"
+	requestTask := jiratasks.JiraTaskCreationRequest{
+		Fields: jiratasks.JiraTaskCreationFields{
+			Project: jiratasks.JiraTaskCreationProject{
+				Key: "PROJECT",
+			},
+			Summary:     "Some summary",
+			Description: "More about issue",
+			IssueType: jiratasks.JiraTaskCreationIssueType{
+				Name: "Bug",
+			},
+		},
+	}
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		assert.Equal(t, req.URL.String(), "/rest/api/2/issue/")
 		bufSize := 1024
@@ -22,10 +30,7 @@ func TestCreateIssue(t *testing.T) {
 		length, _ := req.Body.Read(buffer)
 		var issue jiratasks.JiraTaskCreationRequest
 		json.Unmarshal(buffer[:length], &issue)
-		assert.Equal(t, issueType, issue.Fields.IssueType.Name)
-		assert.Equal(t, summary, issue.Fields.Summary)
-		assert.Equal(t, description, issue.Fields.Description)
-		assert.Equal(t, project, issue.Fields.Project.Key)
+		assert.Equal(t, requestTask, issue)
 		result := jiratasks.JiraTaskCreationResponse{
 			Id:  "000",
 			Key: "1",
@@ -36,17 +41,6 @@ func TestCreateIssue(t *testing.T) {
 	defer server.Close()
 	client := server.Client()
 	jiraClient := NewJiraHttpClient(client, server.URL, "", "")
-	_, err := jiraClient.CreateTask(jiratasks.JiraTaskCreationRequest{
-		Fields: jiratasks.JiraTaskCreationFields{
-			Project: jiratasks.JiraTaskCreationProject{
-				Key: project,
-			},
-			Summary:     summary,
-			Description: description,
-			IssueType: jiratasks.JiraTaskCreationIssueType{
-				Name: issueType,
-			},
-		},
-	})
+	_, err := jiraClient.CreateTask(requestTask)
 	assert.Nil(t, err)
 }
