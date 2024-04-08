@@ -14,3 +14,12 @@ type TaskCreated struct {
 	Project     string
 	Link        string
 }
+
+func NewTaskCreateRequest(name string, description string, typeTask string, project string) TaskCreateRequest {
+	return TaskCreateRequest{
+		Name:        name,
+		Description: description,
+		Type:        typeTask,
+		Project:     project,
+	}
+}

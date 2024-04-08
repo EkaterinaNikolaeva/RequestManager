@@ -40,6 +40,9 @@ func (client *MattermostHttpClient) CreatePost(post mattermostmessages.RequestPo
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp do request for creation mattermost post")
 	}
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("http response: status code %d and status %s when attemp make request", resp.StatusCode, resp.Status)
+	}
 	bytesResp, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp read bytes for creation mattermost post")
