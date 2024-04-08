@@ -24,3 +24,7 @@ type JiraTaskCreationResponse struct {
 	Key  string `json:"key"`
 	Self string `json:"self"`
 }
+
+type JiraCommentRequest struct {
+	Body string `json:"body"`
+}

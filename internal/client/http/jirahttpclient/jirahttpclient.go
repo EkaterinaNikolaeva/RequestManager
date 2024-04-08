@@ -43,23 +43,48 @@ func (client *JiraHttpClient) CreateTask(task jiratasks.JiraTaskCreationRequest)
 	}
 	req, err := http.NewRequest("POST", client.baseUrl+"/rest/api/2/issue/", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
-		return "", fmt.Errorf(err.Error() + " when attemp new request for create mattermost post")
+		return "", fmt.Errorf(err.Error() + " when attemp new request for create jira task")
 	}
 	req.Header.Add("Authorization", "Basic "+client.authorizationCode)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf(err.Error() + " when attemp do http request for create mattermost post")
+		return "", fmt.Errorf(err.Error() + " when attemp do http request for create jira task")
 	}
 	bytesResp, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf(err.Error() + " when attemp create mattermost post")
+		return "", fmt.Errorf(err.Error() + " when attemp create jira task")
 	}
 	log.Printf("Jira create task: %s", bytesResp)
 	var response jiratasks.JiraTaskCreationResponse
 	err = json.Unmarshal(bytesResp, &response)
 	if err != nil {
-		return "", fmt.Errorf(err.Error() + " when attemp create mattermost post")
+		return "", fmt.Errorf(err.Error() + " when attemp create jira post")
 	}
 	return client.getIssueLink(response, task)
+}
+
+func (client *JiraHttpClient) AddComment(text string, idIssue string) error {
+	comment := jiratasks.JiraCommentRequest{
+		Body: text,
+	}
+	bytesRepresentation, err := json.Marshal(comment)
+	if err != nil {
+		return fmt.Errorf(err.Error() + " when attemp marshal jira comment")
+	}
+	req, err := http.NewRequest("POST", client.baseUrl+"/rest/api/2/issue/"+idIssue+"/comment", bytes.NewBuffer(bytesRepresentation))
+	if err != nil {
+		return fmt.Errorf(err.Error() + " when attemp new request for create jira comment")
+	}
+	req.Header.Add("Authorization", "Basic "+client.authorizationCode)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf(err.Error() + " when attemp do http request for create jira post")
+	}
+	_, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf(err.Error() + " when attemp readALl response body creation comment")
+	}
+	return nil
 }
