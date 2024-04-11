@@ -31,37 +31,38 @@ func NewJiraHttpClient(httpClient *http.Client, url string, username string, pas
 	}
 }
 
-func (client *JiraHttpClient) getIssueLink(response jiratasks.JiraTaskCreationResponse, task jiratasks.JiraTaskCreationRequest) (string, error) {
+func (client *JiraHttpClient) getIssueLink(response jiratasks.JiraTaskCreationResponse, task jiratasks.JiraTaskCreationRequest) string {
 	link := client.baseUrl + "/projects/" + task.Fields.Project.Key + "/issues/" + response.Key
-	return link, nil
+	return link
 }
 
-func (client *JiraHttpClient) CreateTask(task jiratasks.JiraTaskCreationRequest) (string, error) {
+func (client *JiraHttpClient) CreateTask(task jiratasks.JiraTaskCreationRequest) (string, string, error) {
 	bytesRepresentation, err := json.Marshal(task)
 	if err != nil {
-		return "", fmt.Errorf(err.Error() + " when attemp create jira issue marshal task")
+		return "", "", fmt.Errorf(err.Error() + " when attemp create jira issue marshal task")
 	}
 	req, err := http.NewRequest("POST", client.baseUrl+"/rest/api/2/issue/", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
-		return "", fmt.Errorf(err.Error() + " when attemp new request for create jira task")
+		return "", "", fmt.Errorf(err.Error() + " when attemp new request for create jira task")
 	}
 	req.Header.Add("Authorization", "Basic "+client.authorizationCode)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf(err.Error() + " when attemp do http request for create jira task")
+		return "", "", fmt.Errorf(err.Error() + " when attemp do http request for create jira task")
 	}
 	bytesResp, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf(err.Error() + " when attemp create jira task")
+		return "", "", fmt.Errorf(err.Error() + " when attemp create jira task")
 	}
 	log.Printf("Jira create task: %s", bytesResp)
 	var response jiratasks.JiraTaskCreationResponse
 	err = json.Unmarshal(bytesResp, &response)
 	if err != nil {
-		return "", fmt.Errorf(err.Error() + " when attemp create jira post")
+		return "", "", fmt.Errorf(err.Error() + " when attemp create jira post")
 	}
-	return client.getIssueLink(response, task)
+	link := client.getIssueLink(response, task)
+	return link, response.Key, nil
 }
 
 func (client *JiraHttpClient) AddComment(text string, idIssue string) error {

@@ -41,6 +41,6 @@ func TestCreateIssue(t *testing.T) {
 	defer server.Close()
 	client := server.Client()
 	jiraClient := NewJiraHttpClient(client, server.URL, "", "")
-	_, err := jiraClient.CreateTask(requestTask)
+	_, _, err := jiraClient.CreateTask(requestTask)
 	assert.Nil(t, err)
 }

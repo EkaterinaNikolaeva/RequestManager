@@ -10,6 +10,12 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
 )
 
+type StorageMsgTasks interface {
+	GetIdTaskByMessage(msgId string) (string, bool)
+	GetIdMessageByTask(taskId string) (string, bool)
+	AddElement(msgId string, taskId string)
+}
+
 type MessagesProvider interface {
 	GetMessagesChannel() <-chan message.Message
 }
@@ -22,31 +28,39 @@ type TaskCreator interface {
 	CreateTask(task task.TaskCreateRequest) (task.TaskCreated, error)
 }
 
+type CommentCreator interface {
+	CreateComment(text string, idTask string) error
+}
+
 type MessagesMatcher interface {
 	MatchMessage(message message.Message) bool
 }
 
 type TaskFromMessagesCreator struct {
-	messagesProvider   MessagesProvider
-	messagesSender     MessagesSender
-	taskCreator        TaskCreator
-	messagesMatcher    MessagesMatcher
-	messageReply       *template.Template
-	taskDefaultProject string
-	taskDefaultType    string
+	messagesProvider    MessagesProvider
+	messagesSender      MessagesSender
+	taskCreator         TaskCreator
+	messagesMatcher     MessagesMatcher
+	messageReply        *template.Template
+	taskDefaultProject  string
+	taskDefaultType     string
+	storageTaskMessages StorageMsgTasks
+	commentCreator      CommentCreator
 }
 
 func NewTaskFromMessagesCreator(provider MessagesProvider, sender MessagesSender, matcher MessagesMatcher,
 	taskCreator TaskCreator, messageDefaultReply *template.Template,
-	taskDefaultProject string, taskDefaultType string) TaskFromMessagesCreator {
+	taskDefaultProject string, taskDefaultType string, storage StorageMsgTasks, commentCreator CommentCreator) TaskFromMessagesCreator {
 	return TaskFromMessagesCreator{
-		messagesProvider:   provider,
-		messagesSender:     sender,
-		messagesMatcher:    matcher,
-		messageReply:       messageDefaultReply,
-		taskCreator:        taskCreator,
-		taskDefaultProject: taskDefaultProject,
-		taskDefaultType:    taskDefaultType,
+		messagesProvider:    provider,
+		messagesSender:      sender,
+		messagesMatcher:     matcher,
+		messageReply:        messageDefaultReply,
+		taskCreator:         taskCreator,
+		taskDefaultProject:  taskDefaultProject,
+		taskDefaultType:     taskDefaultType,
+		storageTaskMessages: storage,
+		commentCreator:      commentCreator,
 	}
 }
 
@@ -59,7 +73,14 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 			log.Printf("ctx is done, stop service task from message creation")
 			return
 		case msg := <-messagesChannel:
-			if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(msg) {
+			taskId, isTask := s.storageTaskMessages.GetIdTaskByMessage(msg.RootMessageId)
+			if isTask && !msg.Author.IsBot {
+				log.Printf("get message in thread " + msg.RootMessageId + " by task " + taskId)
+				err := s.commentCreator.CreateComment("New msg in thread: "+msg.MessageText, taskId)
+				if err != nil {
+					log.Printf("error when add comment in thread %q", err)
+				}
+			} else if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(msg) {
 				task, err := s.taskCreator.CreateTask(
 					task.TaskCreateRequest{
 						Name:        "From mattermost",
@@ -84,7 +105,9 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 				if err != nil {
 					log.Printf("error when send reply %q", err)
 				}
+				s.storageTaskMessages.AddElement(msg.RootMessageId, task.Id)
 			}
+
 		}
 	}
 }

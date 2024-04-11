@@ -17,13 +17,14 @@ func NewJiraTaskCreator(jiraHttpClient jirahttpclient.JiraHttpClient) JiraTaskCr
 }
 
 func (t JiraTaskCreator) CreateTask(requestedTask task.TaskCreateRequest) (task.TaskCreated, error) {
-	link, err := t.jiraHttpClient.CreateTask(mapJiraIssueFromTask(requestedTask))
+	link, id, err := t.jiraHttpClient.CreateTask(mapJiraIssueFromTask(requestedTask))
 	return task.TaskCreated{
 		Link:        link,
 		Name:        requestedTask.Name,
 		Description: requestedTask.Description,
 		Type:        requestedTask.Type,
 		Project:     requestedTask.Project,
+		Id:          id,
 	}, err
 }
 

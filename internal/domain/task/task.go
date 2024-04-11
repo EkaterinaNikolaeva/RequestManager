@@ -13,6 +13,7 @@ type TaskCreated struct {
 	Type        string
 	Project     string
 	Link        string
+	Id          string
 }
 
 func NewTaskCreateRequest(name string, description string, typeTask string, project string) TaskCreateRequest {

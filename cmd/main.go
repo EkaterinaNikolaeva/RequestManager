@@ -12,11 +12,13 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiracommentcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jirataskcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostprovider"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostsender"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesmatcher"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagemessagetasks"
 )
 
 func main() {
@@ -32,6 +34,7 @@ func main() {
 	mattermostBot := bot.NewMattermostBot(config)
 	jiraHttpClient := jirahttpclient.NewJiraHttpClient(&http.Client{}, config.JiraBaseUrl, config.JiraBotUsername, config.JiraBotPassword)
 	jiraTaskCreator := jirataskcreator.NewJiraTaskCreator(jiraHttpClient)
+	jiraCommentCreator := jiracommentcreator.NewJiraCommentCreator(jiraHttpClient)
 	httpClientForMessanger := mattermosthttpclient.NewHttpClient(&http.Client{}, mattermostBot.Token, config.MattermostHttp)
 	provider := mattermostprovider.NewMattermostProvider(mattermostBot)
 	sender := mattermostsender.NewMattermostSender(httpClientForMessanger)
@@ -39,8 +42,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unsuccessful start: %q", err)
 	}
+	storage := storagemessagetasks.NewStorageMsgTasksStupid()
 	go provider.Run(ctx)
 	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
-		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType)
+		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, &storage, jiraCommentCreator)
 	taskFromMessagesCreator.Run(ctx)
 }
