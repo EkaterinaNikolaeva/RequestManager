@@ -22,7 +22,6 @@ func NewStorageMsgTasksDB(login string, password string, host string, port strin
 		host,
 		port,
 		name)
-	log.Println(connStr)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return StorageMsgTasksDB{}, err

@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
+
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
@@ -17,17 +19,12 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostprovider"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostsender"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesmatcher"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagedb"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagemessagetasks"
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	storageDB, err := storagedb.NewStorageMsgTasksDB("user", "123", "localhost", "5432", "db", "messagestasks")
-	defer storageDB.DB.Close()
-	if err != nil {
-		log.Fatalf("error when connecting to db: %q", err)
-	}
 	if len(os.Args) < 2 {
 		log.Fatalf("There is not enough args: file name of config")
 	}
@@ -48,9 +45,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unsuccessful start: %q", err)
 	}
-	// s := storagemessagetasks.NewStorageMsgTasksStupid()
+	var storage service.StorageMsgTasks
+	storageValue, err := storagedb.NewStorageMsgTasksDB(config.DbLogin, config.DbPassword, config.DbHost, config.DbPort, config.DbName, config.DbTableName)
+	storage = &storageValue
+	if err != nil {
+		log.Fatalf("error when connecting to db: %q", err)
+		s := storagemessagetasks.NewStorageMsgTasksStupid()
+		storage = &s
+	}
+	defer storage.Finish()
 	go provider.Run(ctx)
 	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
-		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, &storageDB, jiraCommentCreator)
+		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, storage, jiraCommentCreator)
 	taskFromMessagesCreator.Run(ctx)
 }

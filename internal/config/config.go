@@ -22,12 +22,20 @@ type Config struct {
 	JiraIssueType           string `yaml:"jira_issue_type"`
 	JiraBaseUrl             string `yaml:"jira_base_url"`
 	MessagesPatternTemplate *template.Template
+	DbLogin                 string `yaml:"env_db_login"`
+	DbPassword              string `yaml:"env_db_password"`
+	DbHost                  string `yaml:"db_host"`
+	DbPort                  string `yaml:"db_port"`
+	DbName                  string `yaml:"db_name"`
+	DbTableName             string `yaml:"db_table_name"`
 }
 
 func (c *Config) getEnvVars() {
 	c.MattermostToken = os.Getenv(c.MattermostToken)
 	c.JiraBotUsername = os.Getenv(c.JiraBotUsername)
 	c.JiraBotPassword = os.Getenv(c.JiraBotPassword)
+	c.DbLogin = os.Getenv(c.DbLogin)
+	c.DbPassword = os.Getenv(c.DbPassword)
 }
 
 func (c *Config) compileTemplates() error {
