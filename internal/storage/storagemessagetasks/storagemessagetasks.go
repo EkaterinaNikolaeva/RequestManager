@@ -1,6 +1,9 @@
 package storagemessagetasks
 
-import "log"
+import (
+	"context"
+	"log"
+)
 
 type StorageMsgTasksStupid struct {
 	TaskByMessage map[string]string
@@ -13,18 +16,23 @@ func NewStorageMsgTasksStupid() StorageMsgTasksStupid {
 	return StorageMsgTasksStupid{taskByMessage, messageByTask}
 }
 
-func (s *StorageMsgTasksStupid) GetIdTaskByMessage(msgId string) (string, bool) {
+func (s *StorageMsgTasksStupid) GetIdTaskByMessage(msgId string, ctx context.Context) (string, bool, error) {
 	value, ok := s.TaskByMessage[msgId]
-	return value, ok
+	return value, ok, nil
 }
 
-func (s *StorageMsgTasksStupid) GetIdMessageByTask(taskId string) (string, bool) {
+func (s *StorageMsgTasksStupid) GetIdMessageByTask(taskId string, ctx context.Context) (string, bool, error) {
 	value, ok := s.MessageByTask[taskId]
-	return value, ok
+	return value, ok, nil
 }
 
-func (s *StorageMsgTasksStupid) AddElement(msgId string, taskId string) {
+func (s *StorageMsgTasksStupid) AddElement(msgId string, taskId string, ctx context.Context) error {
 	log.Printf("Add task %s, msg %s to storage", taskId, msgId)
 	s.MessageByTask[taskId] = msgId
 	s.TaskByMessage[msgId] = taskId
+	return nil
+}
+
+func (s *StorageMsgTasksStupid) Finish() {
+
 }

@@ -11,9 +11,10 @@ import (
 )
 
 type StorageMsgTasks interface {
-	GetIdTaskByMessage(msgId string) (string, bool)
-	GetIdMessageByTask(taskId string) (string, bool)
-	AddElement(msgId string, taskId string)
+	GetIdTaskByMessage(msgId string, ctx context.Context) (string, bool, error)
+	GetIdMessageByTask(taskId string, ctx context.Context) (string, bool, error)
+	AddElement(msgId string, taskId string, ctx context.Context) error
+	Finish()
 }
 
 type MessagesProvider interface {
@@ -73,9 +74,12 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 			log.Printf("ctx is done, stop service task from message creation")
 			return
 		case msg := <-messagesChannel:
-			taskId, isTask := s.storageTaskMessages.GetIdTaskByMessage(msg.RootMessageId)
-			if isTask && !msg.Author.IsBot {
-				log.Printf("get message in thread " + msg.RootMessageId + " by task " + taskId)
+			taskId, isTask, err := s.storageTaskMessages.GetIdTaskByMessage(msg.RootMessageId, ctx)
+			if err != nil {
+				log.Printf("error when get task id by msg %s: %q", msg.RootMessageId, err)
+			}
+			if isTask && !msg.Author.IsBot && err == nil {
+				log.Printf("get message in thread %s by task %s", msg.RootMessageId, taskId)
 				err := s.commentCreator.CreateComment("New msg in thread: "+msg.MessageText, taskId)
 				if err != nil {
 					log.Printf("error when add comment in thread %q", err)
@@ -105,7 +109,10 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 				if err != nil {
 					log.Printf("error when send reply %q", err)
 				}
-				s.storageTaskMessages.AddElement(msg.RootMessageId, task.Id)
+				err = s.storageTaskMessages.AddElement(msg.RootMessageId, task.Id, ctx)
+				if err != nil {
+					log.Printf("error when try add element to storage %q", err)
+				}
 			}
 
 		}

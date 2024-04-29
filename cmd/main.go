@@ -18,10 +18,16 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostsender"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesmatcher"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagemessagetasks"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagedb"
+	_ "github.com/lib/pq"
 )
 
 func main() {
+	storageDB, err := storagedb.NewStorageMsgTasksDB("user", "123", "localhost", "5432", "db", "messagestasks")
+	defer storageDB.DB.Close()
+	if err != nil {
+		log.Fatalf("error when connecting to db: %q", err)
+	}
 	if len(os.Args) < 2 {
 		log.Fatalf("There is not enough args: file name of config")
 	}
@@ -42,9 +48,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unsuccessful start: %q", err)
 	}
-	storage := storagemessagetasks.NewStorageMsgTasksStupid()
+	// s := storagemessagetasks.NewStorageMsgTasksStupid()
 	go provider.Run(ctx)
 	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
-		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, &storage, jiraCommentCreator)
+		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, &storageDB, jiraCommentCreator)
 	taskFromMessagesCreator.Run(ctx)
 }
