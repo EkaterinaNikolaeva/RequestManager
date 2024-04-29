@@ -11,9 +11,9 @@ import (
 )
 
 type StorageMsgTasks interface {
-	GetIdTaskByMessage(msgId string, ctx context.Context) (string, bool, error)
-	GetIdMessageByTask(taskId string, ctx context.Context) (string, bool, error)
-	AddElement(msgId string, taskId string, ctx context.Context) error
+	GetIdTaskByMessage(ctx context.Context, msgId string) (string, bool, error)
+	GetIdMessageByTask(ctx context.Context, taskId string) (string, bool, error)
+	AddElement(ctx context.Context, msgId string, taskId string) error
 	Finish()
 }
 
@@ -74,7 +74,7 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 			log.Printf("ctx is done, stop service task from message creation")
 			return
 		case msg := <-messagesChannel:
-			taskId, isTask, err := s.storageTaskMessages.GetIdTaskByMessage(msg.RootMessageId, ctx)
+			taskId, isTask, err := s.storageTaskMessages.GetIdTaskByMessage(ctx, msg.RootMessageId)
 			if err != nil {
 				log.Printf("error when get task id by msg %s: %q", msg.RootMessageId, err)
 			}
@@ -109,7 +109,7 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 				if err != nil {
 					log.Printf("error when send reply %q", err)
 				}
-				err = s.storageTaskMessages.AddElement(msg.RootMessageId, task.Id, ctx)
+				err = s.storageTaskMessages.AddElement(ctx, msg.RootMessageId, task.Id)
 				if err != nil {
 					log.Printf("error when try add element to storage %q", err)
 				}
