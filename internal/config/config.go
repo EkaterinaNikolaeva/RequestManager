@@ -22,6 +22,7 @@ type Config struct {
 	JiraIssueType           string `yaml:"jira_issue_type"`
 	JiraBaseUrl             string `yaml:"jira_base_url"`
 	MessagesPatternTemplate *template.Template
+	UseDB                   bool   `yaml:"use_db"`
 	DbLogin                 string `yaml:"env_db_login"`
 	DbPassword              string `yaml:"env_db_password"`
 	DbHost                  string `yaml:"db_host"`

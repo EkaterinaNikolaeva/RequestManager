@@ -74,7 +74,6 @@ func (s *StorageMsgTasksDB) GetIdMessageByTask(ctx context.Context, taskId strin
 func (s *StorageMsgTasksDB) GetIdTaskByMessage(ctx context.Context, msgId string) (string, bool, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	log.Printf("get task id by msg id %s", msgId)
 	query := fmt.Sprintf("select idtask from %s where idmessage='%s'", s.tableName, msgId)
 	rows, err := s.DB.QueryContext(ctx, query)
 	if err != nil {

@@ -74,17 +74,22 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 			log.Printf("ctx is done, stop service task from message creation")
 			return
 		case msg := <-messagesChannel:
-			taskId, isTask, err := s.storageTaskMessages.GetIdTaskByMessage(ctx, msg.RootMessageId)
-			if err != nil {
-				log.Printf("error when get task id by msg %s: %q", msg.RootMessageId, err)
-			}
-			if isTask && !msg.Author.IsBot && err == nil {
-				log.Printf("get message in thread %s by task %s", msg.RootMessageId, taskId)
-				err := s.commentCreator.CreateComment("New msg in thread: "+msg.MessageText, taskId)
+			var isTask bool
+			isTask = false
+			if s.storageTaskMessages != nil {
+				taskId, isTask, err := s.storageTaskMessages.GetIdTaskByMessage(ctx, msg.RootMessageId)
 				if err != nil {
-					log.Printf("error when add comment in thread %q", err)
+					log.Printf("error when get task id by msg %s: %q", msg.RootMessageId, err)
 				}
-			} else if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(msg) {
+				if isTask && !msg.Author.IsBot && err == nil {
+					log.Printf("get message in thread %s by task %s", msg.RootMessageId, taskId)
+					err := s.commentCreator.CreateComment("New msg in thread: "+msg.MessageText, taskId)
+					if err != nil {
+						log.Printf("error when add comment in thread %q", err)
+					}
+				}
+			}
+			if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(msg) && !isTask {
 				task, err := s.taskCreator.CreateTask(
 					task.TaskCreateRequest{
 						Name:        "From mattermost",
@@ -109,9 +114,11 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 				if err != nil {
 					log.Printf("error when send reply %q", err)
 				}
-				err = s.storageTaskMessages.AddElement(ctx, msg.RootMessageId, task.Id)
-				if err != nil {
-					log.Printf("error when try add element to storage %q", err)
+				if s.storageTaskMessages != nil {
+					err = s.storageTaskMessages.AddElement(ctx, msg.RootMessageId, task.Id)
+					if err != nil {
+						log.Printf("error when try add element to storage %q", err)
+					}
 				}
 			}
 

@@ -45,17 +45,23 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unsuccessful start: %q", err)
 	}
-	var storage service.StorageMsgTasks
-	storageValue, err := storagedb.NewStorageMsgTasksDB(config.DbLogin, config.DbPassword, config.DbHost, config.DbPort, config.DbName, config.DbTableName)
-	storage = &storageValue
-	if err != nil {
-		log.Fatalf("error when connecting to db: %q", err)
-		s := storagemessagetasks.NewStorageMsgTasksStupid()
-		storage = &s
-	}
-	defer storage.Finish()
 	go provider.Run(ctx)
-	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
-		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, storage, jiraCommentCreator)
+	var taskFromMessagesCreator service.TaskFromMessagesCreator
+	if config.UseDB {
+		var storage service.StorageMsgTasks
+		storageValue, err := storagedb.NewStorageMsgTasksDB(config.DbLogin, config.DbPassword, config.DbHost, config.DbPort, config.DbName, config.DbTableName)
+		storage = &storageValue
+		if err != nil {
+			log.Fatalf("error when connecting to db: %q", err)
+			s := storagemessagetasks.NewStorageMsgTasksStupid()
+			storage = &s
+		}
+		defer storage.Finish()
+		taskFromMessagesCreator = service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
+			config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, storage, jiraCommentCreator)
+	} else {
+		taskFromMessagesCreator = service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
+			config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, nil, jiraCommentCreator)
+	}
 	taskFromMessagesCreator.Run(ctx)
 }

@@ -9,6 +9,7 @@ env_jira_bot_password: "JIRA_BOT_PASSWORD"
 jira_project: "TEST"
 jira_issue_type: "Bug"
 jira_base_url: "http://localhost:8080"
+use_db: true
 env_db_login: "DB_LOGIN"
 env_db_password: "DB_PASSWORD"
 db_host: "localhost"
