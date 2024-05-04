@@ -8,11 +8,12 @@ import (
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
+	errornotfound "github.com/EkaterinaNikolaeva/RequestManager/internal/storage/errors"
 )
 
 type StorageMsgTasks interface {
-	GetIdTaskByMessage(ctx context.Context, msgId string) (string, bool, error)
-	GetIdMessageByTask(ctx context.Context, taskId string) (string, bool, error)
+	GetIdTaskByMessage(ctx context.Context, msgId string) (string, error)
+	GetIdMessageByTask(ctx context.Context, taskId string) (string, error)
 	AddElement(ctx context.Context, msgId string, taskId string) error
 	Finish()
 }
@@ -77,11 +78,14 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 			var isTask bool
 			isTask = false
 			if s.storageTaskMessages != nil {
-				taskId, isTask, err := s.storageTaskMessages.GetIdTaskByMessage(ctx, msg.RootMessageId)
+				taskId, err := s.storageTaskMessages.GetIdTaskByMessage(ctx, msg.RootMessageId)
 				if err != nil {
-					log.Printf("error when get task id by msg %s: %q", msg.RootMessageId, err)
-				}
-				if isTask && !msg.Author.IsBot && err == nil {
+					_, ok := err.(errornotfound.NotFoundError)
+					if !ok {
+						log.Printf("error when get task id by msg %s: %q", msg.RootMessageId, err)
+					}
+				} else if !msg.Author.IsBot {
+					isTask = true
 					log.Printf("get message in thread %s by task %s", msg.RootMessageId, taskId)
 					err := s.commentCreator.CreateComment("New msg in thread: "+msg.MessageText, taskId)
 					if err != nil {

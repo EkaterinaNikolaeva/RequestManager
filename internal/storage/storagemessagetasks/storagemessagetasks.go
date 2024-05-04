@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"sync"
+
+	errornotfound "github.com/EkaterinaNikolaeva/RequestManager/internal/storage/errors"
 )
 
 type StorageMsgTasksStupid struct {
@@ -21,18 +23,24 @@ func NewStorageMsgTasksStupid() StorageMsgTasksStupid {
 	}
 }
 
-func (s *StorageMsgTasksStupid) GetIdTaskByMessage(ctx context.Context, msgId string) (string, bool, error) {
+func (s *StorageMsgTasksStupid) GetIdTaskByMessage(ctx context.Context, msgId string) (string, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	value, ok := s.TaskByMessage[msgId]
-	return value, ok, nil
+	if !ok {
+		return value, errornotfound.NewNotFoundError()
+	}
+	return value, nil
 }
 
-func (s *StorageMsgTasksStupid) GetIdMessageByTask(ctx context.Context, taskId string) (string, bool, error) {
+func (s *StorageMsgTasksStupid) GetIdMessageByTask(ctx context.Context, taskId string) (string, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	value, ok := s.MessageByTask[taskId]
-	return value, ok, nil
+	if !ok {
+		return value, errornotfound.NewNotFoundError()
+	}
+	return value, nil
 }
 
 func (s *StorageMsgTasksStupid) AddElement(ctx context.Context, msgId string, taskId string) error {

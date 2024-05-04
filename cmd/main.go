@@ -49,7 +49,7 @@ func main() {
 	var taskFromMessagesCreator service.TaskFromMessagesCreator
 	if config.UseDB {
 		var storage service.StorageMsgTasks
-		storageValue, err := storagedb.NewStorageMsgTasksDB(config.DbLogin, config.DbPassword, config.DbHost, config.DbPort, config.DbName, config.DbTableName)
+		storageValue, err := storagedb.NewStorageMsgTasksDB(ctx, config.DbLogin, config.DbPassword, config.DbHost, config.DbPort, config.DbName, config.DbTableName)
 		storage = &storageValue
 		if err != nil {
 			log.Fatalf("error when connecting to db: %q", err)
