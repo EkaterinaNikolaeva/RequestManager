@@ -9,6 +9,8 @@ import (
 	"syscall"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storageinmemory"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagepostgres"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
@@ -19,8 +21,6 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostprovider"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostsender"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesmatcher"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagedb"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagemessagetasks"
 	_ "github.com/lib/pq"
 )
 
@@ -49,11 +49,11 @@ func main() {
 	var taskFromMessagesCreator service.TaskFromMessagesCreator
 	if config.UseDB {
 		var storage service.StorageMsgTasks
-		storageValue, err := storagedb.NewStorageMsgTasksDB(ctx, config.DbLogin, config.DbPassword, config.DbHost, config.DbPort, config.DbName, config.DbTableName)
+		storageValue, err := storagepostgres.NewStorageMsgTasksDB(ctx, config.DbLogin, config.DbPassword, config.DbHost, config.DbPort, config.DbName, config.DbTableName)
 		storage = &storageValue
 		if err != nil {
 			log.Fatalf("error when connecting to db: %q", err)
-			s := storagemessagetasks.NewStorageMsgTasksStupid()
+			s := storageinmemory.NewStorageMsgTasksInMemory()
 			storage = &s
 		}
 		defer storage.Finish()

@@ -1,4 +1,4 @@
-package storagedb
+package storagepostgres
 
 import (
 	"context"
@@ -39,19 +39,15 @@ func NewStorageMsgTasksDB(ctx context.Context, login string, password string, ho
 
 func (s *StorageMsgTasksDB) AddElement(ctx context.Context, msgId string, taskId string) error {
 	log.Printf("add message %s and task %s to db", msgId, taskId)
-	query := fmt.Sprintf("INSERT into %s (idtask, idmessage) VALUES ('%s', '%s')", s.tableName, taskId, msgId)
-	rows, err := s.DB.QueryContext(ctx, query)
-	if err != nil {
-		return err
-	}
-	err = rows.Close()
+	query := "INSERT INTO " + s.tableName + " (idtask, idmessage) VALUES ($1, $2)"
+	_, err := s.DB.ExecContext(ctx, query, taskId, msgId)
 	return err
 }
 
 func (s *StorageMsgTasksDB) GetIdMessageByTask(ctx context.Context, taskId string) (string, error) {
 	log.Printf("get msg id by task id %s", taskId)
-	query := fmt.Sprintf("select idmessage from %s where idtask='%s'", s.tableName, taskId)
-	rows, err := s.DB.QueryContext(ctx, query)
+	query := fmt.Sprintf("select idmessage from %s where idtask=$1", s.tableName)
+	rows, err := s.DB.QueryContext(ctx, query, taskId)
 	if err != nil {
 		return "", err
 	}
@@ -68,8 +64,8 @@ func (s *StorageMsgTasksDB) GetIdMessageByTask(ctx context.Context, taskId strin
 }
 
 func (s *StorageMsgTasksDB) GetIdTaskByMessage(ctx context.Context, msgId string) (string, error) {
-	query := fmt.Sprintf("select idtask from %s where idmessage='%s'", s.tableName, msgId)
-	rows, err := s.DB.QueryContext(ctx, query)
+	query := fmt.Sprintf("select idtask from %s where idmessage=$1", s.tableName)
+	rows, err := s.DB.QueryContext(ctx, query, msgId)
 	if err != nil {
 		return "", err
 	}
