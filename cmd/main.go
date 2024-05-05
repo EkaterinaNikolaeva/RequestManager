@@ -16,6 +16,7 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
+	StorageType "github.com/EkaterinaNikolaeva/RequestManager/internal/config"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiracommentcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jirataskcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostprovider"
@@ -46,22 +47,20 @@ func main() {
 		log.Fatalf("Unsuccessful start: %q", err)
 	}
 	go provider.Run(ctx)
-	var taskFromMessagesCreator service.TaskFromMessagesCreator
-	if config.UseDB {
-		var storage service.StorageMsgTasks
-		storageValue, err := storagepostgres.NewStorageMsgTasksDB(ctx, config.DbLogin, config.DbPassword, config.DbHost, config.DbPort, config.DbName, config.DbTableName)
-		storage = &storageValue
-		if err != nil {
-			log.Fatalf("error when connecting to db: %q", err)
-			s := storageinmemory.NewStorageMsgTasksInMemory()
-			storage = &s
+	var storage service.StorageMsgTasks
+	if config.EnableMsgThreating {
+		if config.StorageType == StorageType.POSTGRES {
+			storageValue, err := storagepostgres.NewStorageMsgTasksDB(ctx, config.PostgresLogin, config.PostgresPassword, config.PostgresHost, config.PostgresPort, config.PostgresName, config.PostgresTableName)
+			if err != nil {
+				log.Fatalf("Error when connect to postgres %q", err)
+			}
+			storage = &storageValue
+		} else if config.StorageType == StorageType.IN_MEMORY {
+			storageValue := storageinmemory.NewStorageMsgTasksInMemory()
+			storage = &storageValue
 		}
-		defer storage.Finish()
-		taskFromMessagesCreator = service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
-			config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, storage, jiraCommentCreator)
-	} else {
-		taskFromMessagesCreator = service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
-			config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, nil, jiraCommentCreator)
 	}
+	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
+		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, config.EnableMsgThreating, storage, jiraCommentCreator)
 	taskFromMessagesCreator.Run(ctx)
 }

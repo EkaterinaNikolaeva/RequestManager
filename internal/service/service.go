@@ -46,13 +46,14 @@ type TaskFromMessagesCreator struct {
 	messageReply        *template.Template
 	taskDefaultProject  string
 	taskDefaultType     string
+	enableMsgThreating  bool
 	storageTaskMessages StorageMsgTasks
 	commentCreator      CommentCreator
 }
 
 func NewTaskFromMessagesCreator(provider MessagesProvider, sender MessagesSender, matcher MessagesMatcher,
 	taskCreator TaskCreator, messageDefaultReply *template.Template,
-	taskDefaultProject string, taskDefaultType string, storage StorageMsgTasks, commentCreator CommentCreator) TaskFromMessagesCreator {
+	taskDefaultProject string, taskDefaultType string, enableMsgThreating bool, storage StorageMsgTasks, commentCreator CommentCreator) TaskFromMessagesCreator {
 	return TaskFromMessagesCreator{
 		messagesProvider:    provider,
 		messagesSender:      sender,
@@ -61,6 +62,7 @@ func NewTaskFromMessagesCreator(provider MessagesProvider, sender MessagesSender
 		taskCreator:         taskCreator,
 		taskDefaultProject:  taskDefaultProject,
 		taskDefaultType:     taskDefaultType,
+		enableMsgThreating:  enableMsgThreating,
 		storageTaskMessages: storage,
 		commentCreator:      commentCreator,
 	}
@@ -77,7 +79,7 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 		case msg := <-messagesChannel:
 			var isTask bool
 			isTask = false
-			if s.storageTaskMessages != nil {
+			if s.enableMsgThreating {
 				taskId, err := s.storageTaskMessages.GetIdTaskByMessage(ctx, msg.RootMessageId)
 				if err != nil {
 					_, ok := err.(errornotfound.NotFoundError)
@@ -118,7 +120,7 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 				if err != nil {
 					log.Printf("error when send reply %q", err)
 				}
-				if s.storageTaskMessages != nil {
+				if s.enableMsgThreating {
 					err = s.storageTaskMessages.AddElement(ctx, msg.RootMessageId, task.Id)
 					if err != nil {
 						log.Printf("error when try add element to storage %q", err)
