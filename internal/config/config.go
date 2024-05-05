@@ -9,6 +9,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type StorageType string
+
+const (
+	IN_MEMORY StorageType = "in_memory"
+	POSTGRES  StorageType = "postgres"
+)
+
 type Config struct {
 	MattermostToken         string `yaml:"env_mattermost_token"`
 	MattermostHttp          string `yaml:"mattermost_http"`
@@ -22,12 +29,24 @@ type Config struct {
 	JiraIssueType           string `yaml:"jira_issue_type"`
 	JiraBaseUrl             string `yaml:"jira_base_url"`
 	MessagesPatternTemplate *template.Template
+	EnableMsgThreating      bool        `yaml:"enable_msg_threating"`
+	StorageType             StorageType `yaml:"storage_type"`
+	PostgresLogin           string      `yaml:"env_postgres_login"`
+	PostgresPassword        string      `yaml:"env_postgres_password"`
+	PostgresHost            string      `yaml:"postgres_host"`
+	PostgresPort            string      `yaml:"postgres_port"`
+	PostgresName            string      `yaml:"postgres_name"`
+	PostgresTableName       string      `yaml:"postgres_table_name"`
 }
 
 func (c *Config) getEnvVars() {
 	c.MattermostToken = os.Getenv(c.MattermostToken)
 	c.JiraBotUsername = os.Getenv(c.JiraBotUsername)
 	c.JiraBotPassword = os.Getenv(c.JiraBotPassword)
+	if c.PostgresLogin != "" {
+		c.PostgresLogin = os.Getenv(c.PostgresLogin)
+		c.PostgresPassword = os.Getenv(c.PostgresPassword)
+	}
 }
 
 func (c *Config) compileTemplates() error {
@@ -51,6 +70,9 @@ func (c *Config) validateConfig() error {
 	}
 	if c.MattermostToken == "" {
 		return errors.New("incorrect mattermost token")
+	}
+	if c.StorageType != POSTGRES && c.StorageType != IN_MEMORY && c.EnableMsgThreating {
+		return errors.New("incorrect storage type")
 	}
 	return nil
 }

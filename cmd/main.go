@@ -8,15 +8,21 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storageinmemory"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagepostgres"
+
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
+	StorageType "github.com/EkaterinaNikolaeva/RequestManager/internal/config"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiracommentcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jirataskcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostprovider"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostsender"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesmatcher"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -32,6 +38,7 @@ func main() {
 	mattermostBot := bot.NewMattermostBot(config)
 	jiraHttpClient := jirahttpclient.NewJiraHttpClient(&http.Client{}, config.JiraBaseUrl, config.JiraBotUsername, config.JiraBotPassword)
 	jiraTaskCreator := jirataskcreator.NewJiraTaskCreator(jiraHttpClient)
+	jiraCommentCreator := jiracommentcreator.NewJiraCommentCreator(jiraHttpClient)
 	httpClientForMessanger := mattermosthttpclient.NewHttpClient(&http.Client{}, mattermostBot.Token, config.MattermostHttp)
 	provider := mattermostprovider.NewMattermostProvider(mattermostBot)
 	sender := mattermostsender.NewMattermostSender(httpClientForMessanger)
@@ -40,7 +47,20 @@ func main() {
 		log.Fatalf("Unsuccessful start: %q", err)
 	}
 	go provider.Run(ctx)
+	var storage service.StorageMsgTasks
+	if config.EnableMsgThreating {
+		if config.StorageType == StorageType.POSTGRES {
+			storageValue, err := storagepostgres.NewStorageMsgTasksDB(ctx, config.PostgresLogin, config.PostgresPassword, config.PostgresHost, config.PostgresPort, config.PostgresName, config.PostgresTableName)
+			if err != nil {
+				log.Fatalf("Error when connect to postgres %q", err)
+			}
+			storage = &storageValue
+		} else if config.StorageType == StorageType.IN_MEMORY {
+			storageValue := storageinmemory.NewStorageMsgTasksInMemory()
+			storage = &storageValue
+		}
+	}
 	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
-		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType)
+		config.MessagesPatternTemplate, config.JiraProject, config.JiraIssueType, config.EnableMsgThreating, storage, jiraCommentCreator)
 	taskFromMessagesCreator.Run(ctx)
 }

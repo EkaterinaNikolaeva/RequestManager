@@ -3,6 +3,13 @@ module github.com/EkaterinaNikolaeva/RequestManager
 go 1.18
 
 require (
+	github.com/lib/pq v1.10.4
+	github.com/mattermost/mattermost-server/v6 v6.7.2
+	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3
+	gopkg.in/yaml.v3 v3.0.1
+)
+
+require (
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
@@ -19,7 +26,6 @@ require (
 	github.com/mattermost/ldap v0.0.0-20201202150706-ee0e6284187d // indirect
 	github.com/mattermost/logr/v2 v2.0.15 // indirect
 	github.com/mattermost/mattermost-server v9.4.0+incompatible // indirect
-	github.com/mattermost/mattermost-server/v6 v6.7.2 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/minio-go/v7 v7.0.24 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
@@ -47,5 +53,4 @@ require (
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
