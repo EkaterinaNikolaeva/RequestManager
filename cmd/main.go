@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storageinmemory"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagepostgres"
@@ -15,8 +16,8 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
 	StorageType "github.com/EkaterinaNikolaeva/RequestManager/internal/config"
+
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiracommentcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jirataskcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostprovider"
