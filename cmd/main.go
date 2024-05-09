@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,13 +12,17 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostsender"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesmatcher"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/rocketchatprovider"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/rocketchatsender"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storageinmemory"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagepostgres"
+	"github.com/gopackage/ddp"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
+	rocketchathttpclient "github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchatclient"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiracommentcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jirataskcreator"
@@ -39,9 +44,21 @@ func main() {
 	jiraHttpClient := jirahttpclient.NewJiraHttpClient(&http.Client{}, configData.JiraBaseUrl, configData.JiraBotUsername, configData.JiraBotPassword)
 	jiraTaskCreator := jirataskcreator.NewJiraTaskCreator(jiraHttpClient)
 	jiraCommentCreator := jiracommentcreator.NewJiraCommentCreator(jiraHttpClient)
-	httpClientForMessanger := mattermosthttpclient.NewHttpClient(&http.Client{}, mattermostBot.Token, configData.MattermostHttp)
-	provider := mattermostprovider.NewMattermostProvider(mattermostBot)
-	sender := mattermostsender.NewMattermostSender(httpClientForMessanger)
+	var provider service.MessagesProvider
+	var sender service.MessagesSender
+	if configData.Messenger == config.MATTERMOST {
+		httpClientForMessanger := mattermosthttpclient.NewHttpClient(&http.Client{}, mattermostBot.Token, configData.MattermostHttp)
+		provider = mattermostprovider.NewMattermostProvider(mattermostBot)
+		sender = mattermostsender.NewMattermostSender(httpClientForMessanger)
+	} else if configData.Messenger == config.ROCKETCHAT {
+		client := ddp.NewClient("ws://"+configData.RocketchatHost+"/websocket", (&url.URL{Host: configData.RocketchatHost}).String())
+		provider, err = rocketchatprovider.NewRocketChatPovider(client, configData.RocketchatToken)
+		if err != nil {
+			log.Fatalf("Rocket chat error: %q", err)
+		}
+		rocketchatHttpClient := rocketchathttpclient.NewHttpClient(&http.Client{}, configData.RocketchatId, configData.RocketchatToken, configData.RocketchatHttp)
+		sender = rocketchatsender.NewRocketChatSender(rocketchatHttpClient)
+	}
 	matcher, err := messagesmatcher.NewMessagesMatcher(configData.MessagesPattern)
 	if err != nil {
 		log.Fatalf("Unsuccessful start: %q", err)

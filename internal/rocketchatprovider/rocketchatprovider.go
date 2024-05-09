@@ -2,25 +2,25 @@ package rocketchatprovider
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net/url"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 	"github.com/Jeffail/gabs"
 	"github.com/gopackage/ddp"
 )
 
-type RocketChatPoviderClient struct {
-	ddp   *ddp.Client
-	token string
+type RocketChatPovider struct {
+	ddp        *ddp.Client
+	token      string
+	msgChannel chan message.Message
 }
 
-func NewRocketChatPoviderClient(host string, token string) (*RocketChatPoviderClient, error) {
-	wsUrl := fmt.Sprintf("ws://%v/websocket", host)
-	client := RocketChatPoviderClient{
-		ddp:   ddp.NewClient(wsUrl, (&url.URL{Host: host}).String()),
-		token: token,
+func NewRocketChatPovider(ddpClient *ddp.Client, token string) (*RocketChatPovider, error) {
+	msgChannel := make(chan message.Message, 1024)
+	client := RocketChatPovider{
+		ddp:        ddpClient,
+		token:      token,
+		msgChannel: msgChannel,
 	}
 	err := client.ddp.Connect()
 	if err != nil {
@@ -33,7 +33,7 @@ type ddpLogin struct {
 	Token string `json:"resume"`
 }
 
-func (c *RocketChatPoviderClient) login() error {
+func (c *RocketChatPovider) login() error {
 	_, err := c.ddp.Call("login", ddpLogin{
 		Token: c.token,
 	})
@@ -75,7 +75,7 @@ func (u messageExtractor) CollectionUpdate(collection, operation, id string, doc
 	}
 }
 
-func (c *RocketChatPoviderClient) proccessChannels(msgChannel chan message.Message) error {
+func (c *RocketChatPovider) proccessChannels(msgChannel chan message.Message) error {
 	rawResponse, err := c.ddp.Call("rooms/get", map[string]int{
 		"$date": 0,
 	})
@@ -101,22 +101,25 @@ func (c *RocketChatPoviderClient) proccessChannels(msgChannel chan message.Messa
 	return nil
 }
 
-func (client *RocketChatPoviderClient) Run(ctx context.Context) error {
+func (client *RocketChatPovider) Run(ctx context.Context) {
 	err := client.login()
 	if err != nil {
-		return fmt.Errorf("error when rocketchat login: %q", err)
+		log.Fatalf("error when rocketchat login: %q", err)
 	}
-	msgChannel := make(chan message.Message, 1024)
-	err = client.proccessChannels(msgChannel)
+	err = client.proccessChannels(client.msgChannel)
 	if err != nil {
-		return fmt.Errorf("error when rocketchat proccess msgs: %q", err)
+		log.Fatalf("error when rocketchat proccess msgs: %q", err)
 	}
 	for {
 		select {
 		case <-ctx.Done():
 			log.Printf("ctx is done, stop rocketchat client")
 			client.ddp.Close()
-			return nil
+			return
 		}
 	}
+}
+
+func (c *RocketChatPovider) GetMessagesChannel() <-chan message.Message {
+	return c.msgChannel
 }

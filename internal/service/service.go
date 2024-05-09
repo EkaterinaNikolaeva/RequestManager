@@ -20,6 +20,7 @@ type StorageMsgTasks interface {
 
 type MessagesProvider interface {
 	GetMessagesChannel() <-chan message.Message
+	Run(ctx context.Context)
 }
 
 type MessagesSender interface {

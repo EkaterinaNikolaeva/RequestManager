@@ -45,12 +45,18 @@ type Config struct {
 	PostgresPort            string      `yaml:"postgres_port"`
 	PostgresName            string      `yaml:"postgres_name"`
 	PostgresTableName       string      `yaml:"postgres_table_name"`
+	RocketchatHost          string      `yaml:"rocketchat_host"`
+	RocketchatToken         string      `yaml:"env_rocketchat_token"`
+	RocketchatId            string      `yaml:"env_rocketchat_id"`
+	RocketchatHttp          string      `yaml:"rocketchat_http"`
 }
 
 func (c *Config) getEnvVars() {
 	c.MattermostToken = os.Getenv(c.MattermostToken)
 	c.JiraBotUsername = os.Getenv(c.JiraBotUsername)
 	c.JiraBotPassword = os.Getenv(c.JiraBotPassword)
+	c.RocketchatToken = os.Getenv(c.RocketchatToken)
+	c.RocketchatId = os.Getenv(c.RocketchatId)
 	if c.PostgresLogin != "" {
 		c.PostgresLogin = os.Getenv(c.PostgresLogin)
 		c.PostgresPassword = os.Getenv(c.PostgresPassword)
