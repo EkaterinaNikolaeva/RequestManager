@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/mattermost/mattermostmessages"
 )
 
 type MattermostHttpClient struct {

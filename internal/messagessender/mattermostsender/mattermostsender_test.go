@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/mattermost/mattermostmessages"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
 	"github.com/stretchr/testify/assert"
 )
 

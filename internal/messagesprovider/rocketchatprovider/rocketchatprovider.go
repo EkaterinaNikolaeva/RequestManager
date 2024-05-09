@@ -12,21 +12,23 @@ import (
 type RocketChatPovider struct {
 	ddp        *ddp.Client
 	token      string
+	id         string
 	msgChannel chan message.Message
 }
 
-func NewRocketChatPovider(ddpClient *ddp.Client, token string) (*RocketChatPovider, error) {
+func NewRocketChatPovider(ddpClient *ddp.Client, id string, token string) (*RocketChatPovider, error) {
 	msgChannel := make(chan message.Message, 1024)
-	client := RocketChatPovider{
+	provider := RocketChatPovider{
 		ddp:        ddpClient,
 		token:      token,
+		id:         id,
 		msgChannel: msgChannel,
 	}
-	err := client.ddp.Connect()
+	err := provider.ddp.Connect()
 	if err != nil {
 		return nil, err
 	}
-	return &client, err
+	return &provider, err
 }
 
 type ddpLogin struct {
@@ -43,10 +45,11 @@ func (c *RocketChatPovider) login() error {
 type messageExtractor struct {
 	messageChannel chan message.Message
 	operation      string
+	botId          string
 }
 
-func (u messageExtractor) CollectionUpdate(collection, operation, id string, doc ddp.Update) {
-	if operation == u.operation {
+func (m messageExtractor) CollectionUpdate(collection, operation, id string, doc ddp.Update) {
+	if operation == m.operation {
 		allArgs, _ := gabs.Consume(doc["args"])
 		if allArgs.Path("replies").Data() != nil {
 			return
@@ -60,15 +63,15 @@ func (u messageExtractor) CollectionUpdate(collection, operation, id string, doc
 			rid, _ := arg.Path("rid").Data().(string)
 			msg, _ := arg.Path("msg").Data().(string)
 			tmid, _ := arg.Path("tmid").Data().(string)
-			username, _ := arg.Path("u.username").Data().(string)
+			userId, _ := arg.Path("u._id").Data().(string)
 			if tmid != "" {
 				id = tmid
 			}
-			u.messageChannel <- message.Message{
+			m.messageChannel <- message.Message{
 				MessageText:   msg,
 				ChannelId:     rid,
 				RootMessageId: id,
-				Author:        message.MessageAuthor{Id: username},
+				Author:        message.MessageAuthor{Id: userId, IsBot: userId == m.botId},
 			}
 
 		}
@@ -89,32 +92,31 @@ func (c *RocketChatPovider) proccessChannels(msgChannel chan message.Message) er
 	}
 	for i := range channells {
 		id := channells[i].Path("_id")
-		log.Println(id)
 		err = c.ddp.Sub("stream-room-messages", id.Data(), true)
 		if err != nil {
 			return nil
 		}
 		if i == 0 {
-			c.ddp.CollectionByName("stream-room-messages").AddUpdateListener(messageExtractor{msgChannel, "update"})
+			c.ddp.CollectionByName("stream-room-messages").AddUpdateListener(messageExtractor{msgChannel, "update", c.id})
 		}
 	}
 	return nil
 }
 
-func (client *RocketChatPovider) Run(ctx context.Context) {
-	err := client.login()
+func (p *RocketChatPovider) Run(ctx context.Context) {
+	err := p.login()
 	if err != nil {
 		log.Fatalf("error when rocketchat login: %q", err)
 	}
-	err = client.proccessChannels(client.msgChannel)
+	err = p.proccessChannels(p.msgChannel)
 	if err != nil {
 		log.Fatalf("error when rocketchat proccess msgs: %q", err)
 	}
 	for {
 		select {
 		case <-ctx.Done():
-			log.Printf("ctx is done, stop rocketchat client")
-			client.ddp.Close()
+			log.Printf("ctx is done, stop rocketchat provider")
+			p.ddp.Close()
 			return
 		}
 	}

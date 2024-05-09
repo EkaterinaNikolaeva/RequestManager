@@ -1,9 +1,9 @@
 package mattermostsender
 
 import (
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/mattermost/mattermostmessages"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostmessages"
 )
 
 type MattermostSender struct {

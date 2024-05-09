@@ -10,10 +10,11 @@ import (
 	"syscall"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostsender"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesmatcher"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/rocketchatprovider"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/rocketchatsender"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesprovider/mattermostprovider"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesprovider/rocketchatprovider"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagessender/mattermostsender"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagessender/rocketchatsender"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storageinmemory"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagepostgres"
@@ -26,7 +27,6 @@ import (
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiracommentcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/jirataskcreator"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/mattermostprovider"
 	_ "github.com/lib/pq"
 )
 
@@ -52,7 +52,7 @@ func main() {
 		sender = mattermostsender.NewMattermostSender(httpClientForMessanger)
 	} else if configData.Messenger == config.ROCKETCHAT {
 		client := ddp.NewClient("ws://"+configData.RocketchatHost+"/websocket", (&url.URL{Host: configData.RocketchatHost}).String())
-		provider, err = rocketchatprovider.NewRocketChatPovider(client, configData.RocketchatToken)
+		provider, err = rocketchatprovider.NewRocketChatPovider(client, configData.RocketchatId, configData.RocketchatToken)
 		if err != nil {
 			log.Fatalf("Rocket chat error: %q", err)
 		}
