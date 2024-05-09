@@ -20,11 +20,12 @@ func TestLoadConfigNoSuchFile(t *testing.T) {
 	}
 }
 
-func makeConfigData(envMattermostToken string, mattermostHttp string, mattermostWebsocket string, teamName string, jiraHttp string) string {
-	configData := "env_mattermost_token: " + envMattermostToken + "\n"
+func makeConfigDataMattermost(envMattermostToken string, mattermostHttp string, mattermostWebsocket string, teamName string, jiraHttp string) string {
+	configData := "messenger: " + "mattermost" + "\n"
+	configData += "env_mattermost_token: " + envMattermostToken + "\n"
 	configData += "mattermost_http: " + mattermostHttp + "\n"
 	configData += "mattermost_websocket: " + mattermostWebsocket + "\n"
-	configData += "team_name: " + teamName + "\n"
+	configData += "mettermost_team_name: " + teamName + "\n"
 	configData += "jira_base_url: " + jiraHttp + "\n"
 	return configData
 }
@@ -36,7 +37,7 @@ func TestLoadConfig(t *testing.T) {
 	jiraHttp := "http://localhost:0000"
 	mattermostWebsocket := "ws://localhost:0000"
 	teamName := "team"
-	configData := makeConfigData(envMattermostToken, mattermostHttp, mattermostWebsocket, teamName, jiraHttp)
+	configData := makeConfigDataMattermost(envMattermostToken, mattermostHttp, mattermostWebsocket, teamName, jiraHttp)
 	configFile, err := ioutil.TempFile("", "config-*.txt")
 	if err == nil {
 		configFile.Write([]byte(configData))
@@ -46,7 +47,7 @@ func TestLoadConfig(t *testing.T) {
 		assert.Equal(t, config.MattermostToken, envMattermostToken)
 		assert.Equal(t, config.MattermostHttp, mattermostHttp)
 		assert.Equal(t, config.MattermostWebsocket, mattermostWebsocket)
-		assert.Equal(t, config.TeamName, teamName)
+		assert.Equal(t, config.MattermostTeamName, teamName)
 		os.Remove(configFile.Name())
 	}
 
@@ -56,7 +57,7 @@ func TestIncorrectConfig(t *testing.T) {
 	configFile, err := ioutil.TempFile("", "config-*.txt")
 	fileName := configFile.Name()
 	if err == nil {
-		configData := makeConfigData("token", "https://localhost:0000", "ws://localhost:0000", "team", "https://localhost:0000")
+		configData := makeConfigDataMattermost("token", "https://localhost:0000", "ws://localhost:0000", "team", "https://localhost:0000")
 		configFile.WriteString(configData)
 		configFile.Close()
 		_, err := LoadConfig(configFile.Name())
@@ -65,7 +66,7 @@ func TestIncorrectConfig(t *testing.T) {
 		configFile.Close()
 
 		configFile, _ = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 755)
-		configData = makeConfigData("token", "httpss://localhost:0000", "ws://localhost:0000", "team", "http://localhost:0000")
+		configData = makeConfigDataMattermost("token", "httpss://localhost:0000", "ws://localhost:0000", "team", "http://localhost:0000")
 		configFile.Write([]byte(configData))
 		configFile.Close()
 		_, err = LoadConfig(configFile.Name())
@@ -74,7 +75,7 @@ func TestIncorrectConfig(t *testing.T) {
 		configFile.Close()
 
 		configFile, _ = os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 755)
-		configData = makeConfigData("token", "https://localhost:0000", "ws:/localhost:0000", "team", "https://localhost:0000")
+		configData = makeConfigDataMattermost("token", "https://localhost:0000", "ws:/localhost:0000", "team", "https://localhost:0000")
 		configFile.Write([]byte(configData))
 		configFile.Close()
 		_, err = LoadConfig(configFile.Name())
@@ -89,7 +90,7 @@ func TestIncorrectConfig(t *testing.T) {
 
 func makeConfigDataWithStorage(envMattermostToken string, mattermostHttp string, mattermostWebsocket string, teamName string,
 	jiraHttp string, enableMsgThreting bool, storageType string) string {
-	configData := makeConfigData(envMattermostToken, mattermostHttp, mattermostWebsocket, teamName, jiraHttp)
+	configData := makeConfigDataMattermost(envMattermostToken, mattermostHttp, mattermostWebsocket, teamName, jiraHttp)
 	configData += "enable_msg_threating: " + strconv.FormatBool(enableMsgThreting) + "\n"
 	configData += "storage_type: " + storageType + "\n"
 	return configData

@@ -14,7 +14,7 @@ type MattermostBot struct {
 func NewMattermostBot(config config.Config) MattermostBot {
 	var bot MattermostBot
 	bot.Token = config.MattermostToken
-	bot.TeamName = config.TeamName
+	bot.TeamName = config.MattermostTeamName
 	bot.MattermostHttp = config.MattermostHttp
 	bot.MattermostWebsocket = config.MattermostWebsocket
 	return bot

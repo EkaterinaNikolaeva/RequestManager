@@ -1,6 +1,7 @@
 package rocketchatprovider
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/url"
@@ -32,15 +33,11 @@ type ddpLogin struct {
 	Token string `json:"resume"`
 }
 
-func (c *RocketChatPoviderClient) Login() error {
-	request := ddpLogin{
+func (c *RocketChatPoviderClient) login() error {
+	_, err := c.ddp.Call("login", ddpLogin{
 		Token: c.token,
-	}
-	_, err := c.ddp.Call("login", request)
-	if err != nil {
-		return err
-	}
-	return nil
+	})
+	return err
 }
 
 type messageExtractor struct {
@@ -50,11 +47,11 @@ type messageExtractor struct {
 
 func (u messageExtractor) CollectionUpdate(collection, operation, id string, doc ddp.Update) {
 	if operation == u.operation {
-		document, _ := gabs.Consume(doc["args"])
-		if document.Path("replies").Data() != nil {
+		allArgs, _ := gabs.Consume(doc["args"])
+		if allArgs.Path("replies").Data() != nil {
 			return
 		}
-		args, err := document.Children()
+		args, err := allArgs.Children()
 		if err != nil {
 			return
 		}
@@ -78,21 +75,20 @@ func (u messageExtractor) CollectionUpdate(collection, operation, id string, doc
 	}
 }
 
-func (c *RocketChatPoviderClient) ProccessChannels(msgChannel chan message.Message) error {
+func (c *RocketChatPoviderClient) proccessChannels(msgChannel chan message.Message) error {
 	rawResponse, err := c.ddp.Call("rooms/get", map[string]int{
 		"$date": 0,
 	})
 	if err != nil {
 		return nil
 	}
-	document, _ := gabs.Consume(rawResponse.(map[string]interface{})["update"])
-	log.Printf("%s", document)
-	children, err := document.Children()
+	allChannels, _ := gabs.Consume(rawResponse.(map[string]interface{})["update"])
+	channells, err := allChannels.Children()
 	if err != nil {
 		return nil
 	}
-	for i := range children {
-		id := children[i].Path("_id")
+	for i := range channells {
+		id := channells[i].Path("_id")
 		log.Println(id)
 		err = c.ddp.Sub("stream-room-messages", id.Data(), true)
 		if err != nil {
@@ -102,24 +98,25 @@ func (c *RocketChatPoviderClient) ProccessChannels(msgChannel chan message.Messa
 			c.ddp.CollectionByName("stream-room-messages").AddUpdateListener(messageExtractor{msgChannel, "update"})
 		}
 	}
-
 	return nil
 }
 
-func (client *RocketChatPoviderClient) Run() error {
-	err := client.Login()
+func (client *RocketChatPoviderClient) Run(ctx context.Context) error {
+	err := client.login()
 	if err != nil {
-		log.Fatalf("fatalf2 %q", err)
+		return fmt.Errorf("error when rocketchat login: %q", err)
 	}
 	msgChannel := make(chan message.Message, 1024)
-	err = client.ProccessChannels(msgChannel)
+	err = client.proccessChannels(msgChannel)
 	if err != nil {
-		log.Fatalf("fatalf3 %q", err)
+		return fmt.Errorf("error when rocketchat proccess msgs: %q", err)
 	}
 	for {
 		select {
-		case msg := <-msgChannel:
-			log.Printf("THERE %s %s %s", msg.RootMessageId, msg.MessageText, msg.ChannelId)
+		case <-ctx.Done():
+			log.Printf("ctx is done, stop rocketchat client")
+			client.ddp.Close()
+			return nil
 		}
 	}
 }
