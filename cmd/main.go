@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/commentcreator/jiracommentcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesmatcher"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesprovider/mattermostprovider"
@@ -18,6 +19,7 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storageinmemory"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagepostgres"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/taskcreator/jirataskcreator"
 	"github.com/gopackage/ddp"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
@@ -25,8 +27,6 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	rocketchathttpclient "github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchatclient"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiracommentcreator"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/jirataskcreator"
 	_ "github.com/lib/pq"
 )
 
