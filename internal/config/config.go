@@ -10,17 +10,25 @@ import (
 )
 
 type StorageType string
+type Messenger string
 
 const (
 	IN_MEMORY StorageType = "in_memory"
 	POSTGRES  StorageType = "postgres"
 )
 
+const (
+	MATTERMOST Messenger = "mattermost"
+	ROCKETCHAT Messenger = "rocketchat"
+)
+
 type Config struct {
+	Messenger Messenger `yaml:"messenger"`
+
 	MattermostToken         string `yaml:"env_mattermost_token"`
 	MattermostHttp          string `yaml:"mattermost_http"`
 	MattermostWebsocket     string `yaml:"mattermost_websocket,omitempty"`
-	TeamName                string `yaml:"team_name"`
+	MattermostTeamName      string `yaml:"mettermost_team_name"`
 	MessagesPattern         string `yaml:"messages_pattern"`
 	MessageReply            string `yaml:"message_reply"`
 	JiraBotUsername         string `yaml:"env_jira_bot_username"`
@@ -37,12 +45,18 @@ type Config struct {
 	PostgresPort            string      `yaml:"postgres_port"`
 	PostgresName            string      `yaml:"postgres_name"`
 	PostgresTableName       string      `yaml:"postgres_table_name"`
+	RocketchatHost          string      `yaml:"rocketchat_host"`
+	RocketchatToken         string      `yaml:"env_rocketchat_token"`
+	RocketchatId            string      `yaml:"env_rocketchat_id"`
+	RocketchatHttp          string      `yaml:"rocketchat_http"`
 }
 
 func (c *Config) getEnvVars() {
 	c.MattermostToken = os.Getenv(c.MattermostToken)
 	c.JiraBotUsername = os.Getenv(c.JiraBotUsername)
 	c.JiraBotPassword = os.Getenv(c.JiraBotPassword)
+	c.RocketchatToken = os.Getenv(c.RocketchatToken)
+	c.RocketchatId = os.Getenv(c.RocketchatId)
 	if c.PostgresLogin != "" {
 		c.PostgresLogin = os.Getenv(c.PostgresLogin)
 		c.PostgresPassword = os.Getenv(c.PostgresPassword)
@@ -62,10 +76,10 @@ var validHttp = regexp.MustCompile(`http[s]?://.*`)
 var validWs = regexp.MustCompile(`ws://.*`)
 
 func (c *Config) validateConfig() error {
-	if !validWs.MatchString(c.MattermostWebsocket) {
+	if c.Messenger == MATTERMOST && !validWs.MatchString(c.MattermostWebsocket) {
 		return errors.New("incorrect websocket server")
 	}
-	if !validHttp.MatchString(c.MattermostHttp) || !validHttp.MatchString(c.JiraBaseUrl) {
+	if c.Messenger == MATTERMOST && !validHttp.MatchString(c.MattermostHttp) || !validHttp.MatchString(c.JiraBaseUrl) {
 		return errors.New("incorrect http server")
 	}
 	if c.MattermostToken == "" {
@@ -73,6 +87,9 @@ func (c *Config) validateConfig() error {
 	}
 	if c.StorageType != POSTGRES && c.StorageType != IN_MEMORY && c.EnableMsgThreating {
 		return errors.New("incorrect storage type")
+	}
+	if c.Messenger != MATTERMOST && c.Messenger != ROCKETCHAT {
+		return errors.New("incorrect messenger")
 	}
 	return nil
 }

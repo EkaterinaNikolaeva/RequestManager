@@ -10,6 +10,8 @@ require (
 )
 
 require (
+	github.com/Jeffail/gabs v1.4.0 // indirect
+	github.com/apex/log v1.9.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
@@ -17,6 +19,7 @@ require (
 	github.com/francoispqt/gojay v1.2.13 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.3 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/gopackage/ddp v0.0.6 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/graph-gophers/graphql-go v1.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
