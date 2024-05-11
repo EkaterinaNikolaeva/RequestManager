@@ -2,7 +2,7 @@ package yandextrackertaskcreator
 
 import (
 	apiyandextracker "github.com/EkaterinaNikolaeva/RequestManager/internal/api/yandextracker"
-	yandextrackerhttpclient "github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerclient"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerhttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
 )
 

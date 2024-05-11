@@ -28,7 +28,7 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchathttpclient"
-	yandextrackerhttpclient "github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerclient"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerhttpclient"
 
 	_ "github.com/lib/pq"
 )

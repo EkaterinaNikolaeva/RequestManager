@@ -3,7 +3,7 @@ package yandextrackercommentcreator
 import (
 	"log"
 
-	yandextrackerhttpclient "github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerclient"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerhttpclient"
 )
 
 type YandexTrackerCommentCreator struct {
