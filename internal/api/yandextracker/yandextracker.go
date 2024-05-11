@@ -4,6 +4,7 @@ type RequestTask struct {
 	Summary     string `json:"summary"`
 	Description string `json:"description"`
 	Queue       string `json:"queue"`
+	Type        string `json:"type"`
 }
 
 type ResponseTask struct {
@@ -39,5 +40,31 @@ type ResponseParamsTask struct {
 	Self    string `json:"self"`
 	Id      string `json:"id"`
 	Key     string `json:"key"`
+	Display string `json:"display"`
+}
+
+type RequestComment struct {
+	Text string `json:"text"`
+}
+
+type ResponseComment struct {
+	Self              string                  `json:"self"`
+	Id                string                  `json:"id"`
+	LongId            string                  `json:"longId"`
+	Text              string                  `json:"text"`
+	CreateBody        ResponseParamsComment   `json:"createBody"`
+	UpdateBody        ResponseParamsComment   `json:"updateBody"`
+	CreatedAt         string                  `json:"createdAt"`
+	UpdatedAt         string                  `json:"updatedAt"`
+	Summonees         []ResponseParamsComment `json:"summonees"`
+	MaillistSummonees []ResponseParamsComment `json:"maillistSummonees"`
+	Version           int                     `json:"version"`
+	Type              string                  `json:"type"`
+	Transport         string                  `json:"transport"`
+}
+
+type ResponseParamsComment struct {
+	Self    string `json:"self"`
+	Id      string `json:"id"`
 	Display string `json:"display"`
 }

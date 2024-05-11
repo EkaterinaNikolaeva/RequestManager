@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
 	errornotfound "github.com/EkaterinaNikolaeva/RequestManager/internal/storage/errors"
@@ -45,6 +46,8 @@ type TaskFromMessagesCreator struct {
 	taskCreator         TaskCreator
 	messagesMatcher     MessagesMatcher
 	messageReply        *template.Template
+	defaultTaskName     *template.Template
+	Messenger           config.Messenger
 	taskDefaultProject  string
 	taskDefaultType     string
 	enableMsgThreating  bool
@@ -54,7 +57,8 @@ type TaskFromMessagesCreator struct {
 
 func NewTaskFromMessagesCreator(provider MessagesProvider, sender MessagesSender, matcher MessagesMatcher,
 	taskCreator TaskCreator, messageDefaultReply *template.Template,
-	taskDefaultProject string, taskDefaultType string, enableMsgThreating bool, storage StorageMsgTasks, commentCreator CommentCreator) TaskFromMessagesCreator {
+	taskDefaultProject string, taskDefaultType string, enableMsgThreating bool, storage StorageMsgTasks,
+	commentCreator CommentCreator, messenger config.Messenger, defaultTaskName *template.Template) TaskFromMessagesCreator {
 	return TaskFromMessagesCreator{
 		messagesProvider:    provider,
 		messagesSender:      sender,
@@ -66,6 +70,8 @@ func NewTaskFromMessagesCreator(provider MessagesProvider, sender MessagesSender
 		enableMsgThreating:  enableMsgThreating,
 		storageTaskMessages: storage,
 		commentCreator:      commentCreator,
+		Messenger:           messenger,
+		defaultTaskName:     defaultTaskName,
 	}
 }
 
@@ -97,9 +103,15 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 				}
 			}
 			if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(msg) && !isTask {
+				var taskName bytes.Buffer
+				err := s.defaultTaskName.Execute(&taskName, s)
+				if err != nil {
+					log.Printf("error when execute task name template %q", err)
+					continue
+				}
 				task, err := s.taskCreator.CreateTask(
 					task.TaskCreateRequest{
-						Name:        "From mattermost",
+						Name:        taskName.String(),
 						Description: msg.MessageText,
 						Project:     s.taskDefaultProject,
 						Type:        s.taskDefaultType,

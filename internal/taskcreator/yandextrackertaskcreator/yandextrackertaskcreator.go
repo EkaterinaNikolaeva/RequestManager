@@ -1,19 +1,38 @@
 package yandextrackertaskcreator
 
 import (
+	apiyandextracker "github.com/EkaterinaNikolaeva/RequestManager/internal/api/yandextracker"
 	yandextrackerhttpclient "github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
 )
 
 type YandexTrackerTaskCreator struct {
-	yandexTrackerHttpClient *yandextrackerhttpclient.YandexTracketHttpClient
+	yandexTrackerHttpClient yandextrackerhttpclient.YandexTracketHttpClient
 }
 
-func NewYandexTrackerTaskCreator(yandexTrackerHttpClient *yandextrackerhttpclient.YandexTracketHttpClient) YandexTrackerTaskCreator {
+func NewYandexTrackerTaskCreator(yandexTrackerHttpClient yandextrackerhttpclient.YandexTracketHttpClient) YandexTrackerTaskCreator {
 	return YandexTrackerTaskCreator{
 		yandexTrackerHttpClient: yandexTrackerHttpClient,
 	}
 }
 
-func (y YandexTrackerTaskCreator) CreateTask(task task.TaskCreateRequest) (task.TaskCreated, error) {
+func (y YandexTrackerTaskCreator) CreateTask(requestedTask task.TaskCreateRequest) (task.TaskCreated, error) {
+	link, id, err := y.yandexTrackerHttpClient.CreateTask(mapJiraIssueFromTask(requestedTask))
+	return task.TaskCreated{
+		Link:        link,
+		Name:        requestedTask.Name,
+		Description: requestedTask.Description,
+		Type:        requestedTask.Type,
+		Project:     requestedTask.Project,
+		Id:          id,
+	}, err
+}
+
+func mapJiraIssueFromTask(requestedTask task.TaskCreateRequest) apiyandextracker.RequestTask {
+	return apiyandextracker.RequestTask{
+		Summary:     requestedTask.Name,
+		Description: requestedTask.Description,
+		Queue:       requestedTask.Project,
+		Type:        requestedTask.Type,
+	}
 }

@@ -2,7 +2,7 @@ package rocketchatsender
 
 import (
 	apirocketchat "github.com/EkaterinaNikolaeva/RequestManager/internal/api/rocketchat"
-	rocketchathttpclient "github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchatclient"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchathttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 )
 

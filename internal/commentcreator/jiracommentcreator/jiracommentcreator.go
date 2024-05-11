@@ -21,6 +21,6 @@ func (t JiraCommentCreator) CreateComment(text string, idTask string) error {
 	if err != nil {
 		return nil
 	}
-	log.Printf("Add comment: %s to task %s", text, idTask)
+	log.Printf("Add comment in Jira: %s to task %s", text, idTask)
 	return nil
 }
