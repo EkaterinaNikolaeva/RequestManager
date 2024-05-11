@@ -1,9 +1,9 @@
 package jirataskcreator
 
 import (
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/jira/jiratasks"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiratasks"
 )
 
 type JiraTaskCreator struct {

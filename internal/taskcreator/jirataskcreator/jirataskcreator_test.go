@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/jira/jiratasks"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiratasks"
 	"github.com/stretchr/testify/assert"
 )
 
