@@ -69,7 +69,7 @@ func (client *YandexTracketHttpClient) CreateTask(task apiyandextracker.RequestT
 	var response apiyandextracker.ResponseTask
 	err = json.Unmarshal(bytesResp, &response)
 	if err != nil {
-		return "", "", fmt.Errorf(err.Error() + " when attemp create jira post")
+		return "", "", fmt.Errorf(err.Error() + " when attemp create yandex tracker task")
 	}
 	link := client.getIssueLink(response)
 	return link, response.Key, nil

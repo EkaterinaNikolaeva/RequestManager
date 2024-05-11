@@ -22,6 +22,7 @@ func TestLoadConfigNoSuchFile(t *testing.T) {
 
 func makeConfigDataMattermost(envMattermostToken string, mattermostHttp string, mattermostWebsocket string, teamName string, jiraHttp string) string {
 	configData := "messenger: " + "mattermost" + "\n"
+	configData += "task_tracker: " + "jira" + "\n"
 	configData += "env_mattermost_token: " + envMattermostToken + "\n"
 	configData += "mattermost_http: " + mattermostHttp + "\n"
 	configData += "mattermost_websocket: " + mattermostWebsocket + "\n"
