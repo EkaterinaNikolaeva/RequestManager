@@ -59,18 +59,32 @@ func (m messageExtractor) CollectionUpdate(collection, operation, id string, doc
 			return
 		}
 		for _, arg := range args {
-			id, _ := arg.Path("_id").Data().(string)
-			rid, _ := arg.Path("rid").Data().(string)
-			msg, _ := arg.Path("msg").Data().(string)
-			tmid, _ := arg.Path("tmid").Data().(string)
-			userId, _ := arg.Path("u._id").Data().(string)
-			if tmid != "" {
-				id = tmid
+			var rootMsgId string
+			id, ok := arg.Path("_id").Data().(string)
+			if !ok {
+				continue
+			}
+			rootMsgId = id
+			rid, ok := arg.Path("rid").Data().(string)
+			if !ok {
+				continue
+			}
+			msg, ok := arg.Path("msg").Data().(string)
+			if !ok {
+				continue
+			}
+			userId, ok := arg.Path("u._id").Data().(string)
+			if !ok {
+				continue
+			}
+			tmid, ok := arg.Path("tmid").Data().(string)
+			if ok && tmid != "" {
+				rootMsgId = tmid
 			}
 			m.messageChannel <- message.Message{
 				MessageText:   msg,
 				ChannelId:     rid,
-				RootMessageId: id,
+				RootMessageId: rootMsgId,
 				Author:        message.MessageAuthor{Id: userId, IsBot: userId == m.botId},
 			}
 

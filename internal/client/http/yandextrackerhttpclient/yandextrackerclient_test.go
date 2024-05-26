@@ -43,12 +43,12 @@ func TestCreateComment(t *testing.T) {
 		typeOrganization string
 		tokenType        string
 		token            string
-		expectsError     bool
+		wantErr          bool
 	}{
 		"simple": {text: "text", idIssue: "Test-1", idOrganization: "id-org",
-			typeOrganization: "TYPE-ORG", tokenType: "Bearer", token: "token", expectsError: false},
+			typeOrganization: "TYPE-ORG", tokenType: "Bearer", token: "token", wantErr: false},
 		"without header": {text: "other text", idIssue: "ID-3", idOrganization: "org",
-			tokenType: "Oauth", token: "ttt", expectsError: true},
+			tokenType: "Oauth", token: "ttt", wantErr: true},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -68,10 +68,9 @@ func TestCreateComment(t *testing.T) {
 			client := server.Client()
 			yandexTrackerHttpClient := NewYandexTracketHttpClient(server.URL, server.URL, tc.idOrganization, tc.typeOrganization, tc.tokenType, tc.token, client)
 			err := yandexTrackerHttpClient.AddComment(context.Background(), tc.text, tc.idIssue)
-			if !tc.expectsError {
-				assert.Nil(t, err)
-			} else {
-				assert.NotNil(t, err)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("AddComment() error = %v, wantErr %v", err, tc.wantErr)
+				return
 			}
 		})
 	}
