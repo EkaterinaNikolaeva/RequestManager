@@ -6,13 +6,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	apirocketchat "github.com/EkaterinaNikolaeva/RequestManager/internal/api/rocketchat"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSendMessages(t *testing.T) {
-	msg := apirocketchat.RequestMessage{
-		Message: apirocketchat.RequestMessageData{Msg: "text",
+	msg := RequestMessage{
+		Message: RequestMessageData{Msg: "text",
 			Rid:  "chat-id",
 			Tmid: "root-msg-id",
 		},
@@ -24,7 +23,7 @@ func TestSendMessages(t *testing.T) {
 		length, _ := req.Body.Read(buffer)
 		assert.Equal(t, req.Header.Get("X-User-Id"), "user-id")
 		assert.Equal(t, req.Header.Get("X-Auth-Token"), "token")
-		var request apirocketchat.RequestMessage
+		var request RequestMessage
 		json.Unmarshal(buffer[:length], &request)
 		assert.Equal(t, msg, request)
 		rw.Write([]byte(`OK`))

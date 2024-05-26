@@ -7,8 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-
-	apirocketchat "github.com/EkaterinaNikolaeva/RequestManager/internal/api/rocketchat"
 )
 
 type RocketChatHttpClient struct {
@@ -27,7 +25,7 @@ func NewHttpClient(client *http.Client, id string, token string, baseUrl string)
 	}
 }
 
-func (client *RocketChatHttpClient) SendMessage(msg apirocketchat.RequestMessage) error {
+func (client *RocketChatHttpClient) SendMessage(msg RequestMessage) error {
 	bytesRepresentation, err := json.Marshal(msg)
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp marshal message for creation rocketchat post")

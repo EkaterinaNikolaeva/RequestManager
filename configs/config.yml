@@ -1,4 +1,4 @@
-messenger: "mattermost"
+messenger: "rocketchat"
 task_tracker: "yandex_tracker"
 env_mattermost_token: "MATTERMOST_TOKEN"
 mattermost_http:  "http://localhost:8065"
