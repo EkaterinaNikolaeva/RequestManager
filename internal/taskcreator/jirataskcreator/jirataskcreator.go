@@ -1,7 +1,6 @@
 package jirataskcreator
 
 import (
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/jira/jiratasks"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
 )
@@ -28,15 +27,15 @@ func (t JiraTaskCreator) CreateTask(requestedTask task.TaskCreateRequest) (task.
 	}, err
 }
 
-func mapJiraIssueFromTask(requestedTask task.TaskCreateRequest) jiratasks.JiraTaskCreationRequest {
-	issue := jiratasks.JiraTaskCreationRequest{
-		Fields: jiratasks.JiraTaskCreationFields{
-			Project: jiratasks.JiraTaskCreationProject{
+func mapJiraIssueFromTask(requestedTask task.TaskCreateRequest) jirahttpclient.JiraTaskCreationRequest {
+	issue := jirahttpclient.JiraTaskCreationRequest{
+		Fields: jirahttpclient.JiraTaskCreationFields{
+			Project: jirahttpclient.JiraTaskCreationProject{
 				Key: requestedTask.Project,
 			},
 			Summary:     requestedTask.Name,
 			Description: requestedTask.Description,
-			IssueType: jiratasks.JiraTaskCreationIssueType{
+			IssueType: jirahttpclient.JiraTaskCreationIssueType{
 				Name: requestedTask.Type,
 			},
 		},

@@ -8,8 +8,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/jira/jiratasks"
 )
 
 func basicAuth(username string, password string) string {
@@ -31,12 +29,12 @@ func NewJiraHttpClient(httpClient *http.Client, url string, username string, pas
 	}
 }
 
-func (client *JiraHttpClient) getIssueLink(response jiratasks.JiraTaskCreationResponse, task jiratasks.JiraTaskCreationRequest) string {
+func (client *JiraHttpClient) getIssueLink(response JiraTaskCreationResponse, task JiraTaskCreationRequest) string {
 	link := client.baseUrl + "/projects/" + task.Fields.Project.Key + "/issues/" + response.Key
 	return link
 }
 
-func (client *JiraHttpClient) CreateTask(task jiratasks.JiraTaskCreationRequest) (string, string, error) {
+func (client *JiraHttpClient) CreateTask(task JiraTaskCreationRequest) (string, string, error) {
 	bytesRepresentation, err := json.Marshal(task)
 	if err != nil {
 		return "", "", fmt.Errorf(err.Error() + " when attemp create jira issue marshal task")
@@ -56,7 +54,7 @@ func (client *JiraHttpClient) CreateTask(task jiratasks.JiraTaskCreationRequest)
 		return "", "", fmt.Errorf(err.Error() + " when attemp create jira task")
 	}
 	log.Printf("Jira create task: %s", bytesResp)
-	var response jiratasks.JiraTaskCreationResponse
+	var response JiraTaskCreationResponse
 	err = json.Unmarshal(bytesResp, &response)
 	if err != nil {
 		return "", "", fmt.Errorf(err.Error() + " when attemp create jira post")
@@ -66,7 +64,7 @@ func (client *JiraHttpClient) CreateTask(task jiratasks.JiraTaskCreationRequest)
 }
 
 func (client *JiraHttpClient) AddComment(text string, idIssue string) error {
-	comment := jiratasks.JiraCommentRequest{
+	comment := JiraCommentRequest{
 		Body: text,
 	}
 	bytesRepresentation, err := json.Marshal(comment)

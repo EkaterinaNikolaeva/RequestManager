@@ -6,13 +6,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/jira/jiratasks"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateComment(t *testing.T) {
-	comment := jiratasks.JiraCommentRequest{
+	comment := jirahttpclient.JiraCommentRequest{
 		Body: "text",
 	}
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
@@ -21,7 +20,7 @@ func TestCreateComment(t *testing.T) {
 		buffer := make([]byte, bufSize)
 		length, _ := req.Body.Read(buffer)
 		assert.Equal(t, req.Header.Get("Authorization"), "Basic dXNlcm5hbWU6cGFzc3dvcmQ=")
-		var requestComment jiratasks.JiraCommentRequest
+		var requestComment jirahttpclient.JiraCommentRequest
 		json.Unmarshal(buffer[:length], &requestComment)
 		assert.Equal(t, requestComment, comment)
 		rw.Write([]byte(`OK`))
