@@ -1,6 +1,7 @@
 package mattermostsender
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -32,7 +33,7 @@ func TestSendMessages(t *testing.T) {
 	client := server.Client()
 	mmClient := mattermosthttpclient.NewHttpClient(client, "", server.URL)
 	sender := NewMattermostSender(mmClient)
-	assert.Nil(t, sender.SendMessage(message.NewMessage(testMsgText, testChannelId, testRootId, message.NewMessageAuthor(testAuthorId))))
+	assert.Nil(t, sender.SendMessage(context.Background(), message.NewMessage(testMsgText, testChannelId, testRootId, message.NewMessageAuthor(testAuthorId))))
 }
 
 func TestSendMessagesWithError(t *testing.T) {
@@ -49,5 +50,5 @@ func TestSendMessagesWithError(t *testing.T) {
 	client := server.Client()
 	mmClient := mattermosthttpclient.NewHttpClient(client, "", server.URL)
 	sender := NewMattermostSender(mmClient)
-	assert.NotNil(t, sender.SendMessage(message.NewMessage("", "", "", message.NewMessageAuthor(""))))
+	assert.NotNil(t, sender.SendMessage(context.Background(), message.NewMessage("", "", "", message.NewMessageAuthor(""))))
 }

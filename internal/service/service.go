@@ -25,15 +25,15 @@ type MessagesProvider interface {
 }
 
 type MessagesSender interface {
-	SendMessage(message message.Message) error
+	SendMessage(ctx context.Context, message message.Message) error
 }
 
 type TaskCreator interface {
-	CreateTask(task task.TaskCreateRequest) (task.TaskCreated, error)
+	CreateTask(ctx context.Context, task task.TaskCreateRequest) (task.TaskCreated, error)
 }
 
 type CommentCreator interface {
-	CreateComment(text string, idTask string) error
+	CreateComment(ctx context.Context, text string, idTask string) error
 }
 
 type MessagesMatcher interface {
@@ -96,7 +96,7 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 				} else if !msg.Author.IsBot {
 					isTask = true
 					log.Printf("get message in thread %s by task %s", msg.RootMessageId, taskId)
-					err := s.commentCreator.CreateComment("New msg in thread: "+msg.MessageText, taskId)
+					err := s.commentCreator.CreateComment(ctx, "New msg in thread: "+msg.MessageText, taskId)
 					if err != nil {
 						log.Printf("error when add comment in thread %q", err)
 					}
@@ -109,7 +109,7 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 					log.Printf("error when execute task name template %q", err)
 					continue
 				}
-				task, err := s.taskCreator.CreateTask(
+				task, err := s.taskCreator.CreateTask(ctx,
 					task.TaskCreateRequest{
 						Name:        taskName.String(),
 						Description: msg.MessageText,
@@ -126,7 +126,7 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 					log.Printf("error when execute reply template %q", err)
 					continue
 				}
-				err = s.messagesSender.SendMessage(
+				err = s.messagesSender.SendMessage(ctx,
 					message.Message{MessageText: reply.String(),
 						ChannelId:     msg.ChannelId,
 						RootMessageId: msg.RootMessageId})

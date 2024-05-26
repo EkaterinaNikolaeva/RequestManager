@@ -43,7 +43,6 @@ func main() {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	mattermostBot := bot.NewMattermostBot(configData)
 	var taskCreator service.TaskCreator
 	var commentCreator service.CommentCreator
 	var defaultProject string
@@ -67,6 +66,7 @@ func main() {
 	var provider service.MessagesProvider
 	var sender service.MessagesSender
 	if configData.Messenger == config.MessengerMattermost {
+		mattermostBot := bot.NewMattermostBot(configData)
 		httpClientForMessanger := mattermosthttpclient.NewHttpClient(&http.Client{}, mattermostBot.Token, configData.MattermostHttp)
 		provider = mattermostprovider.NewMattermostProvider(mattermostBot)
 		sender = mattermostsender.NewMattermostSender(httpClientForMessanger)

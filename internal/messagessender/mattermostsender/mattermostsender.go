@@ -1,6 +1,8 @@
 package mattermostsender
 
 import (
+	"context"
+
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 )
@@ -15,8 +17,8 @@ func NewMattermostSender(httpClient *mattermosthttpclient.MattermostHttpClient) 
 	}
 }
 
-func (m MattermostSender) SendMessage(message message.Message) error {
-	return m.mattermostHttpClient.CreatePost(mapMattermostPostFromMessage(message))
+func (m MattermostSender) SendMessage(ctx context.Context, message message.Message) error {
+	return m.mattermostHttpClient.CreatePost(ctx, mapMattermostPostFromMessage(message))
 }
 
 func mapMattermostPostFromMessage(message message.Message) mattermosthttpclient.RequestPost {

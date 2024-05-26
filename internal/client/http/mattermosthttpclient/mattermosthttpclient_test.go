@@ -1,6 +1,7 @@
 package mattermosthttpclient
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -26,5 +27,5 @@ func TestSendMessages(t *testing.T) {
 	}))
 	defer server.Close()
 	client := server.Client()
-	assert.Nil(t, NewHttpClient(client, "", server.URL).CreatePost(requestPost))
+	assert.Nil(t, NewHttpClient(client, "", server.URL).CreatePost(context.Background(), requestPost))
 }

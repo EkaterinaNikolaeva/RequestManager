@@ -2,6 +2,7 @@ package mattermosthttpclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -23,12 +24,12 @@ func NewHttpClient(client *http.Client, token string, baseUrl string) *Mattermos
 	}
 }
 
-func (client *MattermostHttpClient) CreatePost(post RequestPost) error {
+func (client *MattermostHttpClient) CreatePost(ctx context.Context, post RequestPost) error {
 	bytesRepresentation, err := json.Marshal(post)
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp marshal message for creation mattermost post")
 	}
-	req, err := http.NewRequest("POST", client.mattermostBaseUrl+"/api/v4/posts", bytes.NewBuffer(bytesRepresentation))
+	req, err := http.NewRequestWithContext(ctx, "POST", client.mattermostBaseUrl+"/api/v4/posts", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp make new request message for creation mattermost post")
 	}

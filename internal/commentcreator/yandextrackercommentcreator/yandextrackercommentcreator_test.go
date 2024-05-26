@@ -1,6 +1,7 @@
 package yandextrackercommentcreator
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -28,5 +29,5 @@ func TestCreateComment(t *testing.T) {
 	client := server.Client()
 	yandexTrackerHttpClient := yandextrackerhttpclient.NewYandexTracketHttpClient(server.URL, server.URL, "id-org", "TYPE-ORG", "Bearer", "token", client)
 	commentCreator := NewYandexTrackerCommentCreator(yandexTrackerHttpClient)
-	commentCreator.CreateComment("text", "TEST-1")
+	commentCreator.CreateComment(context.Background(), "text", "TEST-1")
 }

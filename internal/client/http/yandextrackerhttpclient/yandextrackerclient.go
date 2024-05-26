@@ -2,6 +2,7 @@ package yandextrackerhttpclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -44,13 +45,13 @@ func (client *YandexTracketHttpClient) addHeaders(req *http.Request) {
 
 }
 
-func (client *YandexTracketHttpClient) CreateTask(task RequestTask) (string, string, error) {
+func (client *YandexTracketHttpClient) CreateTask(ctx context.Context, task RequestTask) (string, string, error) {
 	bytesRepresentation, err := json.Marshal(task)
 	log.Printf("%s", bytesRepresentation)
 	if err != nil {
 		return "", "", fmt.Errorf(err.Error() + " when attemp create yandex track marshal task")
 	}
-	req, err := http.NewRequest("POST", client.host+"/v2/issues/", bytes.NewBuffer(bytesRepresentation))
+	req, err := http.NewRequestWithContext(ctx, "POST", client.host+"/v2/issues/", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		return "", "", fmt.Errorf(err.Error() + " when attemp new request for create yandex tracker task")
 	}
@@ -73,7 +74,7 @@ func (client *YandexTracketHttpClient) CreateTask(task RequestTask) (string, str
 	return link, response.Key, nil
 }
 
-func (client *YandexTracketHttpClient) AddComment(text string, idIssue string) error {
+func (client *YandexTracketHttpClient) AddComment(ctx context.Context, text string, idIssue string) error {
 	comment := RequestComment{
 		Text: text,
 	}
@@ -81,7 +82,7 @@ func (client *YandexTracketHttpClient) AddComment(text string, idIssue string) e
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp marshal yandex tracker comment")
 	}
-	req, err := http.NewRequest("POST", client.host+"/v2/issues/"+idIssue+"/comments", bytes.NewBuffer(bytesRepresentation))
+	req, err := http.NewRequestWithContext(ctx, "POST", client.host+"/v2/issues/"+idIssue+"/comments", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp new request for create yandex tracker comment")
 	}

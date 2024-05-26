@@ -1,6 +1,8 @@
 package jirataskcreator
 
 import (
+	"context"
+
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
 )
@@ -15,8 +17,8 @@ func NewJiraTaskCreator(jiraHttpClient jirahttpclient.JiraHttpClient) JiraTaskCr
 	}
 }
 
-func (t JiraTaskCreator) CreateTask(requestedTask task.TaskCreateRequest) (task.TaskCreated, error) {
-	link, id, err := t.jiraHttpClient.CreateTask(mapJiraIssueFromTask(requestedTask))
+func (t JiraTaskCreator) CreateTask(ctx context.Context, requestedTask task.TaskCreateRequest) (task.TaskCreated, error) {
+	link, id, err := t.jiraHttpClient.CreateTask(ctx, mapJiraIssueFromTask(requestedTask))
 	return task.TaskCreated{
 		Link:        link,
 		Name:        requestedTask.Name,

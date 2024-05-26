@@ -1,6 +1,7 @@
 package jirahttpclient
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -40,7 +41,7 @@ func TestCreateIssue(t *testing.T) {
 	defer server.Close()
 	client := server.Client()
 	jiraClient := NewJiraHttpClient(client, server.URL, "", "")
-	_, _, err := jiraClient.CreateTask(requestTask)
+	_, _, err := jiraClient.CreateTask(context.Background(), requestTask)
 	assert.Nil(t, err)
 }
 
@@ -62,5 +63,5 @@ func TestCreateComment(t *testing.T) {
 	defer server.Close()
 	client := server.Client()
 	jiraClient := NewJiraHttpClient(client, server.URL, "username", "password")
-	jiraClient.AddComment("text", "TEST-1")
+	jiraClient.AddComment(context.Background(), "text", "TEST-1")
 }

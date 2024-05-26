@@ -2,6 +2,7 @@ package rocketchathttpclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -25,12 +26,12 @@ func NewHttpClient(client *http.Client, id string, token string, baseUrl string)
 	}
 }
 
-func (client *RocketChatHttpClient) SendMessage(msg RequestMessage) error {
+func (client *RocketChatHttpClient) SendMessage(ctx context.Context, msg RequestMessage) error {
 	bytesRepresentation, err := json.Marshal(msg)
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp marshal message for creation rocketchat post")
 	}
-	req, err := http.NewRequest("POST", client.rocketChatBaseUrl+"/api/v1/chat.sendMessage", bytes.NewBuffer(bytesRepresentation))
+	req, err := http.NewRequestWithContext(ctx, "POST", client.rocketChatBaseUrl+"/api/v1/chat.sendMessage", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp make new request message for creation rocketchat post")
 	}

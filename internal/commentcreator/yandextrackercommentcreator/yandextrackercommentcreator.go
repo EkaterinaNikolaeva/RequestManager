@@ -1,6 +1,7 @@
 package yandextrackercommentcreator
 
 import (
+	"context"
 	"log"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerhttpclient"
@@ -16,8 +17,8 @@ func NewYandexTrackerCommentCreator(yandexTrackerHttpClient yandextrackerhttpcli
 	}
 }
 
-func (y YandexTrackerCommentCreator) CreateComment(text string, idTask string) error {
-	err := y.yandexTrackerHttpClient.AddComment(text, idTask)
+func (y YandexTrackerCommentCreator) CreateComment(ctx context.Context, text string, idTask string) error {
+	err := y.yandexTrackerHttpClient.AddComment(ctx, text, idTask)
 	if err != nil {
 		return nil
 	}

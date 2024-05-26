@@ -1,6 +1,7 @@
 package yandextrackerhttpclient
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -31,7 +32,7 @@ func TestCreateTask(t *testing.T) {
 	defer server.Close()
 	client := server.Client()
 	yandexTrackerHttpClient := NewYandexTracketHttpClient(server.URL, server.URL, "id-org", "TYPE-ORG", "Bearer", "token", client)
-	yandexTrackerHttpClient.CreateTask(task)
+	yandexTrackerHttpClient.CreateTask(context.Background(), task)
 }
 
 func TestCreateComment(t *testing.T) {
@@ -66,7 +67,7 @@ func TestCreateComment(t *testing.T) {
 			defer server.Close()
 			client := server.Client()
 			yandexTrackerHttpClient := NewYandexTracketHttpClient(server.URL, server.URL, tc.idOrganization, tc.typeOrganization, tc.tokenType, tc.token, client)
-			err := yandexTrackerHttpClient.AddComment(tc.text, tc.idIssue)
+			err := yandexTrackerHttpClient.AddComment(context.Background(), tc.text, tc.idIssue)
 			if !tc.expectsError {
 				assert.Nil(t, err)
 			} else {

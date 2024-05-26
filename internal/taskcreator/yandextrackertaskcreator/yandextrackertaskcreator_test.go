@@ -1,6 +1,7 @@
 package yandextrackertaskcreator
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -40,5 +41,5 @@ func TestCreateTask(t *testing.T) {
 	client := server.Client()
 	yandexTrackerHttpClient := yandextrackerhttpclient.NewYandexTracketHttpClient(server.URL, server.URL, "id-org", "TYPE-ORG", "Bearer", "token", client)
 	taskCreator := NewYandexTrackerTaskCreator(yandexTrackerHttpClient)
-	taskCreator.CreateTask(task)
+	taskCreator.CreateTask(context.Background(), task)
 }

@@ -1,6 +1,7 @@
 package jiracommentcreator
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -29,5 +30,5 @@ func TestCreateComment(t *testing.T) {
 	client := server.Client()
 	jiraClient := jirahttpclient.NewJiraHttpClient(client, server.URL, "username", "password")
 	commentCreator := NewJiraCommentCreator(jiraClient)
-	commentCreator.CreateComment("text", "TEST-1")
+	commentCreator.CreateComment(context.Background(), "text", "TEST-1")
 }

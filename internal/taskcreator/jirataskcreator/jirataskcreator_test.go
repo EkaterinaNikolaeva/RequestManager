@@ -1,6 +1,7 @@
 package jirataskcreator
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -40,7 +41,7 @@ func TestCreateTask(t *testing.T) {
 	client := server.Client()
 	jiraClient := jirahttpclient.NewJiraHttpClient(client, server.URL, "", "")
 	taskCreator := NewJiraTaskCreator(jiraClient)
-	task, err := taskCreator.CreateTask(task.NewTaskCreateRequest(testTaskName, testDescription, testType, testProject))
+	task, err := taskCreator.CreateTask(context.Background(), task.NewTaskCreateRequest(testTaskName, testDescription, testType, testProject))
 	assert.Nil(t, err)
 	assert.Equal(t, testDescription, task.Description)
 	assert.Equal(t, testProject, task.Project)

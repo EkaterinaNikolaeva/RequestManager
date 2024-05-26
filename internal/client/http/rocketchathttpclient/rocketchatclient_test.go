@@ -1,6 +1,7 @@
 package rocketchathttpclient
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -31,5 +32,5 @@ func TestSendMessages(t *testing.T) {
 	defer server.Close()
 	client := server.Client()
 	rocketChatClient := NewHttpClient(client, "user-id", "token", server.URL)
-	assert.Nil(t, rocketChatClient.SendMessage(msg))
+	assert.Nil(t, rocketChatClient.SendMessage(context.Background(), msg))
 }

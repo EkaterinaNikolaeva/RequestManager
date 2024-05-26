@@ -1,6 +1,8 @@
 package yandextrackertaskcreator
 
 import (
+	"context"
+
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerhttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
 )
@@ -15,8 +17,8 @@ func NewYandexTrackerTaskCreator(yandexTrackerHttpClient yandextrackerhttpclient
 	}
 }
 
-func (y YandexTrackerTaskCreator) CreateTask(requestedTask task.TaskCreateRequest) (task.TaskCreated, error) {
-	link, id, err := y.yandexTrackerHttpClient.CreateTask(mapJiraIssueFromTask(requestedTask))
+func (y YandexTrackerTaskCreator) CreateTask(ctx context.Context, requestedTask task.TaskCreateRequest) (task.TaskCreated, error) {
+	link, id, err := y.yandexTrackerHttpClient.CreateTask(ctx, mapJiraIssueFromTask(requestedTask))
 	return task.TaskCreated{
 		Link:        link,
 		Name:        requestedTask.Name,
