@@ -1,6 +1,7 @@
 package jirataskcreator
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -8,7 +9,6 @@ import (
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiratasks"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,13 +23,13 @@ func TestCreateTask(t *testing.T) {
 		bufSize := 1024
 		buffer := make([]byte, bufSize)
 		length, _ := req.Body.Read(buffer)
-		var task jiratasks.JiraTaskCreationRequest
+		var task jirahttpclient.JiraTaskCreationRequest
 		json.Unmarshal(buffer[:length], &task)
 		assert.Equal(t, testTaskName, task.Fields.Summary)
 		assert.Equal(t, testDescription, task.Fields.Description)
 		assert.Equal(t, testProject, task.Fields.Project.Key)
 		assert.Equal(t, testType, task.Fields.IssueType.Name)
-		responseTask := jiratasks.JiraTaskCreationResponse{
+		responseTask := jirahttpclient.JiraTaskCreationResponse{
 			Id:  "000",
 			Key: testProject + "-" + testTaskId,
 		}
@@ -41,7 +41,7 @@ func TestCreateTask(t *testing.T) {
 	client := server.Client()
 	jiraClient := jirahttpclient.NewJiraHttpClient(client, server.URL, "", "")
 	taskCreator := NewJiraTaskCreator(jiraClient)
-	task, err := taskCreator.CreateTask(task.NewTaskCreateRequest(testTaskName, testDescription, testType, testProject))
+	task, err := taskCreator.CreateTask(context.Background(), task.NewTaskCreateRequest(testTaskName, testDescription, testType, testProject))
 	assert.Nil(t, err)
 	assert.Equal(t, testDescription, task.Description)
 	assert.Equal(t, testProject, task.Project)

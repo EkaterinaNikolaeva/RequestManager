@@ -1,8 +1,9 @@
 package rocketchatsender
 
 import (
-	apirocketchat "github.com/EkaterinaNikolaeva/RequestManager/internal/api/rocketchat"
-	rocketchathttpclient "github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchatclient"
+	"context"
+
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchathttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 )
 
@@ -16,13 +17,13 @@ func NewRocketChatSender(httpClient *rocketchathttpclient.RocketChatHttpClient) 
 	}
 }
 
-func (s RocketChatSender) SendMessage(message message.Message) error {
-	return s.rocketChatHttpClient.SendMessage(mapRocketChatMessageFromMessage(message))
+func (s RocketChatSender) SendMessage(ctx context.Context, message message.Message) error {
+	return s.rocketChatHttpClient.SendMessage(ctx, mapRocketChatMessageFromMessage(message))
 }
 
-func mapRocketChatMessageFromMessage(message message.Message) apirocketchat.RequestMessage {
-	msg := apirocketchat.RequestMessage{
-		Message: apirocketchat.RequestMessageData{
+func mapRocketChatMessageFromMessage(message message.Message) rocketchathttpclient.RequestMessage {
+	msg := rocketchathttpclient.RequestMessage{
+		Message: rocketchathttpclient.RequestMessageData{
 			Rid:  message.ChannelId,
 			Tmid: message.RootMessageId,
 			Msg:  message.MessageText,

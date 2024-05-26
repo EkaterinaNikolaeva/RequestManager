@@ -1,4 +1,4 @@
-package apirocketchat
+package rocketchathttpclient
 
 type RequestMessage struct {
 	Message RequestMessageData `json:"message"`

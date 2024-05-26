@@ -1,13 +1,13 @@
 package rocketchatsender
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	apirocketchat "github.com/EkaterinaNikolaeva/RequestManager/internal/api/rocketchat"
-	rocketchathttpclient "github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchatclient"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchathttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,8 +19,8 @@ func TestSendMessages(t *testing.T) {
 		ChannelId:     "channel",
 		RootMessageId: "root-msg",
 	}
-	msgRocketChat := apirocketchat.RequestMessage{
-		Message: apirocketchat.RequestMessageData{
+	msgRocketChat := rocketchathttpclient.RequestMessage{
+		Message: rocketchathttpclient.RequestMessageData{
 			Msg:  "text",
 			Tmid: "root-msg",
 			Rid:  "channel",
@@ -33,7 +33,7 @@ func TestSendMessages(t *testing.T) {
 		length, _ := req.Body.Read(buffer)
 		assert.Equal(t, req.Header.Get("X-User-Id"), "user-id")
 		assert.Equal(t, req.Header.Get("X-Auth-Token"), "token")
-		var request apirocketchat.RequestMessage
+		var request rocketchathttpclient.RequestMessage
 		json.Unmarshal(buffer[:length], &request)
 		assert.Equal(t, msgRocketChat, request)
 		rw.Write([]byte(`OK`))
@@ -42,5 +42,5 @@ func TestSendMessages(t *testing.T) {
 	client := server.Client()
 	rocketChatClient := rocketchathttpclient.NewHttpClient(client, "user-id", "token", server.URL)
 	sender := NewRocketChatSender(rocketChatClient)
-	assert.Nil(t, sender.SendMessage(msg))
+	assert.Nil(t, sender.SendMessage(context.Background(), msg))
 }

@@ -9,6 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/commentcreator/jiracommentcreator"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/commentcreator/yandextrackercommentcreator"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesmatcher"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/messagesprovider/mattermostprovider"
@@ -18,15 +20,16 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/service"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storageinmemory"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storagepostgres"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/taskcreator/jirataskcreator"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/taskcreator/yandextrackertaskcreator"
 	"github.com/gopackage/ddp"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
-	rocketchathttpclient "github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchatclient"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/rocketchathttpclient"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerhttpclient"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiracommentcreator"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/jirataskcreator"
 	_ "github.com/lib/pq"
 )
 
@@ -40,17 +43,34 @@ func main() {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	mattermostBot := bot.NewMattermostBot(configData)
-	jiraHttpClient := jirahttpclient.NewJiraHttpClient(&http.Client{}, configData.JiraBaseUrl, configData.JiraBotUsername, configData.JiraBotPassword)
-	jiraTaskCreator := jirataskcreator.NewJiraTaskCreator(jiraHttpClient)
-	jiraCommentCreator := jiracommentcreator.NewJiraCommentCreator(jiraHttpClient)
+	var taskCreator service.TaskCreator
+	var commentCreator service.CommentCreator
+	var defaultProject string
+	var defaultTypeTask string
+
+	if configData.TaskTracker == config.TaskTrackerJira {
+		jiraHttpClient := jirahttpclient.NewJiraHttpClient(&http.Client{}, configData.JiraBaseUrl, configData.JiraBotUsername, configData.JiraBotPassword)
+		taskCreator = jirataskcreator.NewJiraTaskCreator(jiraHttpClient)
+		commentCreator = jiracommentcreator.NewJiraCommentCreator(jiraHttpClient)
+		defaultProject = configData.JiraProject
+		defaultTypeTask = configData.JiraIssueType
+	} else if configData.TaskTracker == config.TaskTrackerYandexTracker {
+		yandexTrackerHttpClient := yandextrackerhttpclient.NewYandexTracketHttpClient(configData.YandexTrackerHost,
+			configData.YandexTrackerBaseUrl, configData.YandexTrackerIdOrganization, configData.YandexTrackerTypeOrganization,
+			configData.YandexTrackerTokenType, configData.YandexTrackerToken, &http.Client{})
+		taskCreator = yandextrackertaskcreator.NewYandexTrackerTaskCreator(yandexTrackerHttpClient)
+		commentCreator = yandextrackercommentcreator.NewYandexTrackerCommentCreator(yandexTrackerHttpClient)
+		defaultProject = configData.YandexTrackerQueue
+		defaultTypeTask = configData.YandexTrackerTaskType
+	}
 	var provider service.MessagesProvider
 	var sender service.MessagesSender
-	if configData.Messenger == config.MATTERMOST {
+	if configData.Messenger == config.MessengerMattermost {
+		mattermostBot := bot.NewMattermostBot(configData)
 		httpClientForMessanger := mattermosthttpclient.NewHttpClient(&http.Client{}, mattermostBot.Token, configData.MattermostHttp)
 		provider = mattermostprovider.NewMattermostProvider(mattermostBot)
 		sender = mattermostsender.NewMattermostSender(httpClientForMessanger)
-	} else if configData.Messenger == config.ROCKETCHAT {
+	} else if configData.Messenger == config.MessengerRocketChat {
 		client := ddp.NewClient("ws://"+configData.RocketchatHost+"/websocket", (&url.URL{Host: configData.RocketchatHost}).String())
 		provider, err = rocketchatprovider.NewRocketChatPovider(client, configData.RocketchatId, configData.RocketchatToken)
 		if err != nil {
@@ -79,8 +99,8 @@ func main() {
 			storage = &storageValue
 		}
 	}
-	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, sender, matcher, jiraTaskCreator,
-		configData.MessagesPatternTemplate, configData.JiraProject, configData.JiraIssueType,
-		configData.EnableMsgThreating, storage, jiraCommentCreator)
+	taskFromMessagesCreator := service.NewTaskFromMessagesCreator(provider, sender, matcher, taskCreator,
+		configData.MessagesPatternTemplate, defaultProject, defaultTypeTask,
+		configData.EnableMsgThreating, storage, commentCreator, configData.Messenger, configData.TaskNamePatternTemplate)
 	taskFromMessagesCreator.Run(ctx)
 }

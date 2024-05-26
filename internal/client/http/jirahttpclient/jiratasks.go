@@ -1,4 +1,4 @@
-package jiratasks
+package jirahttpclient
 
 type JiraTaskCreationRequest struct {
 	Fields JiraTaskCreationFields `json:"fields"`

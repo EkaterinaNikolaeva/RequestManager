@@ -1,10 +1,4 @@
-package mattermostmessages
-
-import (
-	"encoding/json"
-
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
-)
+package mattermosthttpclient
 
 type RequestPost struct {
 	ChannelId string                 `json:"channel_id"`
@@ -31,33 +25,4 @@ type ResponsePost struct {
 	Hashtag       string                 `json:"hashtag,omitempty"`
 	PendingPostId string                 `json:"pending_post_id,omitempty"`
 	Metadata      map[string]interface{} `json:"metadata,omitempty"`
-}
-
-func getFrom(post ResponsePost) string {
-	rootId := post.Id
-	if post.RootId != "" {
-		rootId = post.RootId
-	}
-	return rootId
-}
-
-func checkMessageFromBot(post ResponsePost) bool {
-	props := post.Props
-	fromBot, ok := props["from_bot"]
-	isBot, isBool := fromBot.(bool)
-	return ok && isBool && isBot || fromBot == "true"
-}
-
-func GetMessage(bytes string) (message.Message, error) {
-	var post ResponsePost
-	err := json.Unmarshal([]byte(bytes), &post)
-	if err != nil {
-		return message.Message{}, err
-	}
-	return message.Message{
-		MessageText:   post.Message,
-		ChannelId:     post.ChannelId,
-		RootMessageId: getFrom(post),
-		Author:        message.MessageAuthor{Id: post.UserId, IsBot: checkMessageFromBot(post)},
-	}, nil
 }

@@ -1,6 +1,7 @@
 package jiracommentcreator
 
 import (
+	"context"
 	"log"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
@@ -16,11 +17,11 @@ func NewJiraCommentCreator(jiraHttpClient jirahttpclient.JiraHttpClient) JiraCom
 	}
 }
 
-func (t JiraCommentCreator) CreateComment(text string, idTask string) error {
-	err := t.jiraHttpClient.AddComment(text, idTask)
+func (t JiraCommentCreator) CreateComment(ctx context.Context, text string, idTask string) error {
+	err := t.jiraHttpClient.AddComment(ctx, text, idTask)
 	if err != nil {
 		return nil
 	}
-	log.Printf("Add comment: %s to task %s", text, idTask)
+	log.Printf("Add comment in Jira: %s to task %s", text, idTask)
 	return nil
 }

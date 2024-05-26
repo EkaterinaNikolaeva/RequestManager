@@ -1,9 +1,10 @@
 package jirataskcreator
 
 import (
+	"context"
+
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/jirahttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiratasks"
 )
 
 type JiraTaskCreator struct {
@@ -16,8 +17,8 @@ func NewJiraTaskCreator(jiraHttpClient jirahttpclient.JiraHttpClient) JiraTaskCr
 	}
 }
 
-func (t JiraTaskCreator) CreateTask(requestedTask task.TaskCreateRequest) (task.TaskCreated, error) {
-	link, id, err := t.jiraHttpClient.CreateTask(mapJiraIssueFromTask(requestedTask))
+func (t JiraTaskCreator) CreateTask(ctx context.Context, requestedTask task.TaskCreateRequest) (task.TaskCreated, error) {
+	link, id, err := t.jiraHttpClient.CreateTask(ctx, mapJiraIssueFromTask(requestedTask))
 	return task.TaskCreated{
 		Link:        link,
 		Name:        requestedTask.Name,
@@ -28,15 +29,15 @@ func (t JiraTaskCreator) CreateTask(requestedTask task.TaskCreateRequest) (task.
 	}, err
 }
 
-func mapJiraIssueFromTask(requestedTask task.TaskCreateRequest) jiratasks.JiraTaskCreationRequest {
-	issue := jiratasks.JiraTaskCreationRequest{
-		Fields: jiratasks.JiraTaskCreationFields{
-			Project: jiratasks.JiraTaskCreationProject{
+func mapJiraIssueFromTask(requestedTask task.TaskCreateRequest) jirahttpclient.JiraTaskCreationRequest {
+	issue := jirahttpclient.JiraTaskCreationRequest{
+		Fields: jirahttpclient.JiraTaskCreationFields{
+			Project: jirahttpclient.JiraTaskCreationProject{
 				Key: requestedTask.Project,
 			},
 			Summary:     requestedTask.Name,
 			Description: requestedTask.Description,
-			IssueType: jiratasks.JiraTaskCreationIssueType{
+			IssueType: jirahttpclient.JiraTaskCreationIssueType{
 				Name: requestedTask.Type,
 			},
 		},

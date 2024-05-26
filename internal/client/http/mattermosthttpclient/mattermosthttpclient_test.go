@@ -1,17 +1,17 @@
 package mattermosthttpclient
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/mattermost/mattermostmessages"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSendMessages(t *testing.T) {
-	requestPost := mattermostmessages.RequestPost{
+	requestPost := RequestPost{
 		Message:   "test_post",
 		ChannelId: "test_chat_id",
 	}
@@ -20,12 +20,12 @@ func TestSendMessages(t *testing.T) {
 		bufSize := 1024
 		buffer := make([]byte, bufSize)
 		length, _ := req.Body.Read(buffer)
-		var post mattermostmessages.RequestPost
+		var post RequestPost
 		json.Unmarshal(buffer[:length], &post)
 		assert.Equal(t, requestPost, post)
 		rw.Write([]byte(`OK`))
 	}))
 	defer server.Close()
 	client := server.Client()
-	assert.Nil(t, NewHttpClient(client, "", server.URL).CreatePost(requestPost))
+	assert.Nil(t, NewHttpClient(client, "", server.URL).CreatePost(context.Background(), requestPost))
 }

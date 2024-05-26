@@ -1,12 +1,12 @@
 package mattermostsender
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/mattermost/mattermostmessages"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +22,7 @@ func TestSendMessages(t *testing.T) {
 		bufSize := 1024
 		buffer := make([]byte, bufSize)
 		length, _ := req.Body.Read(buffer)
-		var post mattermostmessages.RequestPost
+		var post mattermosthttpclient.RequestPost
 		json.Unmarshal(buffer[:length], &post)
 		assert.Equal(t, post.ChannelId, testChannelId)
 		assert.Equal(t, post.Message, testMsgText)
@@ -33,7 +33,7 @@ func TestSendMessages(t *testing.T) {
 	client := server.Client()
 	mmClient := mattermosthttpclient.NewHttpClient(client, "", server.URL)
 	sender := NewMattermostSender(mmClient)
-	assert.Nil(t, sender.SendMessage(message.NewMessage(testMsgText, testChannelId, testRootId, message.NewMessageAuthor(testAuthorId))))
+	assert.Nil(t, sender.SendMessage(context.Background(), message.NewMessage(testMsgText, testChannelId, testRootId, message.NewMessageAuthor(testAuthorId))))
 }
 
 func TestSendMessagesWithError(t *testing.T) {
@@ -42,7 +42,7 @@ func TestSendMessagesWithError(t *testing.T) {
 		bufSize := 1024
 		buffer := make([]byte, bufSize)
 		length, _ := req.Body.Read(buffer)
-		var post mattermostmessages.RequestPost
+		var post mattermosthttpclient.RequestPost
 		json.Unmarshal(buffer[:length], &post)
 		rw.WriteHeader(404)
 	}))
@@ -50,5 +50,5 @@ func TestSendMessagesWithError(t *testing.T) {
 	client := server.Client()
 	mmClient := mattermosthttpclient.NewHttpClient(client, "", server.URL)
 	sender := NewMattermostSender(mmClient)
-	assert.NotNil(t, sender.SendMessage(message.NewMessage("", "", "", message.NewMessageAuthor(""))))
+	assert.NotNil(t, sender.SendMessage(context.Background(), message.NewMessage("", "", "", message.NewMessageAuthor(""))))
 }

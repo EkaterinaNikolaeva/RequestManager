@@ -2,14 +2,13 @@ package jirahttpclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/jiratasks"
 )
 
 func basicAuth(username string, password string) string {
@@ -31,17 +30,17 @@ func NewJiraHttpClient(httpClient *http.Client, url string, username string, pas
 	}
 }
 
-func (client *JiraHttpClient) getIssueLink(response jiratasks.JiraTaskCreationResponse, task jiratasks.JiraTaskCreationRequest) string {
+func (client *JiraHttpClient) getIssueLink(response JiraTaskCreationResponse, task JiraTaskCreationRequest) string {
 	link := client.baseUrl + "/projects/" + task.Fields.Project.Key + "/issues/" + response.Key
 	return link
 }
 
-func (client *JiraHttpClient) CreateTask(task jiratasks.JiraTaskCreationRequest) (string, string, error) {
+func (client *JiraHttpClient) CreateTask(ctx context.Context, task JiraTaskCreationRequest) (string, string, error) {
 	bytesRepresentation, err := json.Marshal(task)
 	if err != nil {
 		return "", "", fmt.Errorf(err.Error() + " when attemp create jira issue marshal task")
 	}
-	req, err := http.NewRequest("POST", client.baseUrl+"/rest/api/2/issue/", bytes.NewBuffer(bytesRepresentation))
+	req, err := http.NewRequestWithContext(ctx, "POST", client.baseUrl+"/rest/api/2/issue/", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		return "", "", fmt.Errorf(err.Error() + " when attemp new request for create jira task")
 	}
@@ -56,7 +55,7 @@ func (client *JiraHttpClient) CreateTask(task jiratasks.JiraTaskCreationRequest)
 		return "", "", fmt.Errorf(err.Error() + " when attemp create jira task")
 	}
 	log.Printf("Jira create task: %s", bytesResp)
-	var response jiratasks.JiraTaskCreationResponse
+	var response JiraTaskCreationResponse
 	err = json.Unmarshal(bytesResp, &response)
 	if err != nil {
 		return "", "", fmt.Errorf(err.Error() + " when attemp create jira post")
@@ -65,15 +64,15 @@ func (client *JiraHttpClient) CreateTask(task jiratasks.JiraTaskCreationRequest)
 	return link, response.Key, nil
 }
 
-func (client *JiraHttpClient) AddComment(text string, idIssue string) error {
-	comment := jiratasks.JiraCommentRequest{
+func (client *JiraHttpClient) AddComment(ctx context.Context, text string, idIssue string) error {
+	comment := JiraCommentRequest{
 		Body: text,
 	}
 	bytesRepresentation, err := json.Marshal(comment)
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp marshal jira comment")
 	}
-	req, err := http.NewRequest("POST", client.baseUrl+"/rest/api/2/issue/"+idIssue+"/comment", bytes.NewBuffer(bytesRepresentation))
+	req, err := http.NewRequestWithContext(ctx, "POST", client.baseUrl+"/rest/api/2/issue/"+idIssue+"/comment", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp new request for create jira comment")
 	}
