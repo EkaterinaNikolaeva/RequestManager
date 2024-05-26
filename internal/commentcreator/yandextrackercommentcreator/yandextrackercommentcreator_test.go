@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	apiyandextracker "github.com/EkaterinaNikolaeva/RequestManager/internal/api/yandextracker"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerhttpclient"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +19,7 @@ func TestCreateComment(t *testing.T) {
 		length, _ := req.Body.Read(buffer)
 		assert.Equal(t, req.Header.Get("TYPE-ORG"), "id-org")
 		assert.Equal(t, req.Header.Get("Authorization"), "Bearer token")
-		var request apiyandextracker.RequestComment
+		var request yandextrackerhttpclient.RequestComment
 		json.Unmarshal(buffer[:length], &request)
 		assert.Equal(t, "text", request.Text)
 		rw.Write([]byte(`OK`))

@@ -6,12 +6,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	apiyandextracker "github.com/EkaterinaNikolaeva/RequestManager/internal/api/yandextracker"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateTask(t *testing.T) {
-	task := apiyandextracker.RequestTask{
+	task := RequestTask{
 		Queue:       "TEST-QUEUE",
 		Summary:     "Summary",
 		Description: "Description",
@@ -24,7 +23,7 @@ func TestCreateTask(t *testing.T) {
 		length, _ := req.Body.Read(buffer)
 		assert.Equal(t, req.Header.Get("TYPE-ORG"), "id-org")
 		assert.Equal(t, req.Header.Get("Authorization"), "Bearer token")
-		var request apiyandextracker.RequestTask
+		var request RequestTask
 		json.Unmarshal(buffer[:length], &request)
 		assert.Equal(t, task, request)
 		rw.Write([]byte(`OK`))
@@ -59,7 +58,7 @@ func TestCreateComment(t *testing.T) {
 				length, _ := req.Body.Read(buffer)
 				assert.Equal(t, req.Header.Get(tc.typeOrganization), tc.idOrganization)
 				assert.Equal(t, req.Header.Get("Authorization"), tc.tokenType+" "+tc.token)
-				var request apiyandextracker.RequestComment
+				var request RequestComment
 				json.Unmarshal(buffer[:length], &request)
 				assert.Equal(t, tc.text, request.Text)
 				rw.Write([]byte(`OK`))

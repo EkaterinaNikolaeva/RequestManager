@@ -7,8 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-
-	apiyandextracker "github.com/EkaterinaNikolaeva/RequestManager/internal/api/yandextracker"
 )
 
 type YandexTracketHttpClient struct {
@@ -33,7 +31,7 @@ func NewYandexTracketHttpClient(host string, baseUrl string, idOrganization stri
 	}
 }
 
-func (client *YandexTracketHttpClient) getIssueLink(response apiyandextracker.ResponseTask) string {
+func (client *YandexTracketHttpClient) getIssueLink(response ResponseTask) string {
 	link := client.baseUrl + "/" + response.Key
 	return link
 }
@@ -46,7 +44,7 @@ func (client *YandexTracketHttpClient) addHeaders(req *http.Request) {
 
 }
 
-func (client *YandexTracketHttpClient) CreateTask(task apiyandextracker.RequestTask) (string, string, error) {
+func (client *YandexTracketHttpClient) CreateTask(task RequestTask) (string, string, error) {
 	bytesRepresentation, err := json.Marshal(task)
 	log.Printf("%s", bytesRepresentation)
 	if err != nil {
@@ -66,7 +64,7 @@ func (client *YandexTracketHttpClient) CreateTask(task apiyandextracker.RequestT
 		return "", "", fmt.Errorf(err.Error() + " when attemp create yandex tracker task")
 	}
 	log.Printf("Yandex Tracker create task: %s", bytesResp)
-	var response apiyandextracker.ResponseTask
+	var response ResponseTask
 	err = json.Unmarshal(bytesResp, &response)
 	if err != nil {
 		return "", "", fmt.Errorf(err.Error() + " when attemp create yandex tracker task")
@@ -76,7 +74,7 @@ func (client *YandexTracketHttpClient) CreateTask(task apiyandextracker.RequestT
 }
 
 func (client *YandexTracketHttpClient) AddComment(text string, idIssue string) error {
-	comment := apiyandextracker.RequestComment{
+	comment := RequestComment{
 		Text: text,
 	}
 	bytesRepresentation, err := json.Marshal(comment)

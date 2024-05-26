@@ -1,5 +1,5 @@
 messenger: "mattermost"
-task_tracker: "jira"
+task_tracker: "yandex_tracker"
 env_mattermost_token: "MATTERMOST_TOKEN"
 mattermost_http:  "http://localhost:8065"
 mattermost_websocket: "ws://localhost:8065"

@@ -1,4 +1,4 @@
-package apiyandextracker
+package yandextrackerhttpclient
 
 type RequestTask struct {
 	Summary     string `json:"summary"`

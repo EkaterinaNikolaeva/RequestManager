@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	apiyandextracker "github.com/EkaterinaNikolaeva/RequestManager/internal/api/yandextracker"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/yandextrackerhttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
 	"github.com/stretchr/testify/assert"
@@ -19,7 +18,7 @@ func TestCreateTask(t *testing.T) {
 		Name:        "Name",
 		Project:     "Pr",
 	}
-	taskApiYandexTracker := apiyandextracker.RequestTask{
+	taskApiYandexTracker := yandextrackerhttpclient.RequestTask{
 		Description: "Description",
 		Type:        "Task",
 		Summary:     "Name",
@@ -32,7 +31,7 @@ func TestCreateTask(t *testing.T) {
 		length, _ := req.Body.Read(buffer)
 		assert.Equal(t, req.Header.Get("TYPE-ORG"), "id-org")
 		assert.Equal(t, req.Header.Get("Authorization"), "Bearer token")
-		var request apiyandextracker.RequestTask
+		var request yandextrackerhttpclient.RequestTask
 		json.Unmarshal(buffer[:length], &request)
 		assert.Equal(t, taskApiYandexTracker, request)
 		rw.Write([]byte(`OK`))
