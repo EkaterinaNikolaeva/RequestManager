@@ -49,13 +49,13 @@ func main() {
 	var defaultProject string
 	var defaultTypeTask string
 
-	if configData.TaskTracker == config.JIRA {
+	if configData.TaskTracker == config.TaskTrackerJira {
 		jiraHttpClient := jirahttpclient.NewJiraHttpClient(&http.Client{}, configData.JiraBaseUrl, configData.JiraBotUsername, configData.JiraBotPassword)
 		taskCreator = jirataskcreator.NewJiraTaskCreator(jiraHttpClient)
 		commentCreator = jiracommentcreator.NewJiraCommentCreator(jiraHttpClient)
 		defaultProject = configData.JiraProject
 		defaultTypeTask = configData.JiraIssueType
-	} else if configData.TaskTracker == config.YANDEX_TRACKER {
+	} else if configData.TaskTracker == config.TaskTrackerYandexTracker {
 		yandexTrackerHttpClient := yandextrackerhttpclient.NewYandexTracketHttpClient(configData.YandexTrackerHost,
 			configData.YandexTrackerBaseUrl, configData.YandexTrackerIdOrganization, configData.YandexTrackerTypeOrganization,
 			configData.YandexTrackerTokenType, configData.YandexTrackerToken, &http.Client{})
@@ -66,11 +66,11 @@ func main() {
 	}
 	var provider service.MessagesProvider
 	var sender service.MessagesSender
-	if configData.Messenger == config.MATTERMOST {
+	if configData.Messenger == config.MessengerMattermost {
 		httpClientForMessanger := mattermosthttpclient.NewHttpClient(&http.Client{}, mattermostBot.Token, configData.MattermostHttp)
 		provider = mattermostprovider.NewMattermostProvider(mattermostBot)
 		sender = mattermostsender.NewMattermostSender(httpClientForMessanger)
-	} else if configData.Messenger == config.ROCKETCHAT {
+	} else if configData.Messenger == config.MessengerRocketChat {
 		client := ddp.NewClient("ws://"+configData.RocketchatHost+"/websocket", (&url.URL{Host: configData.RocketchatHost}).String())
 		provider, err = rocketchatprovider.NewRocketChatPovider(client, configData.RocketchatId, configData.RocketchatToken)
 		if err != nil {

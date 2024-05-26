@@ -19,13 +19,13 @@ const (
 )
 
 const (
-	MATTERMOST Messenger = "mattermost"
-	ROCKETCHAT Messenger = "rocketchat"
+	MessengerMattermost Messenger = "mattermost"
+	MessengerRocketChat Messenger = "rocketchat"
 )
 
 const (
-	JIRA           TaskTracker = "jira"
-	YANDEX_TRACKER TaskTracker = "yandex_tracker"
+	TaskTrackerJira          TaskTracker = "jira"
+	TaskTrackerYandexTracker TaskTracker = "yandex_tracker"
 )
 
 type Config struct {
@@ -68,18 +68,18 @@ type Config struct {
 }
 
 func (c *Config) getEnvVars() {
-	if c.Messenger == MATTERMOST {
+	if c.Messenger == MessengerMattermost {
 		c.MattermostToken = os.Getenv(c.MattermostToken)
 	}
-	if c.Messenger == ROCKETCHAT {
+	if c.Messenger == MessengerRocketChat {
 		c.RocketchatToken = os.Getenv(c.RocketchatToken)
 		c.RocketchatId = os.Getenv(c.RocketchatId)
 	}
-	if c.TaskTracker == JIRA {
+	if c.TaskTracker == TaskTrackerJira {
 		c.JiraBotUsername = os.Getenv(c.JiraBotUsername)
 		c.JiraBotPassword = os.Getenv(c.JiraBotPassword)
 	}
-	if c.TaskTracker == YANDEX_TRACKER {
+	if c.TaskTracker == TaskTrackerYandexTracker {
 		c.YandexTrackerIdOrganization = os.Getenv(c.YandexTrackerIdOrganization)
 		c.YandexTrackerToken = os.Getenv(c.YandexTrackerToken)
 	}
@@ -107,10 +107,10 @@ var validHttp = regexp.MustCompile(`http[s]?://.*`)
 var validWs = regexp.MustCompile(`ws://.*`)
 
 func (c *Config) validateConfig() error {
-	if c.Messenger == MATTERMOST && !validWs.MatchString(c.MattermostWebsocket) {
+	if c.Messenger == MessengerMattermost && !validWs.MatchString(c.MattermostWebsocket) {
 		return errors.New("incorrect websocket server")
 	}
-	if c.Messenger == MATTERMOST && !validHttp.MatchString(c.MattermostHttp) || !validHttp.MatchString(c.JiraBaseUrl) {
+	if c.Messenger == MessengerMattermost && !validHttp.MatchString(c.MattermostHttp) || !validHttp.MatchString(c.JiraBaseUrl) {
 		return errors.New("incorrect http server")
 	}
 	if c.MattermostToken == "" {
@@ -119,10 +119,10 @@ func (c *Config) validateConfig() error {
 	if c.StorageType != POSTGRES && c.StorageType != IN_MEMORY && c.EnableMsgThreating {
 		return errors.New("incorrect storage type")
 	}
-	if c.Messenger != MATTERMOST && c.Messenger != ROCKETCHAT {
+	if c.Messenger != MessengerMattermost && c.Messenger != MessengerRocketChat {
 		return errors.New("incorrect messenger")
 	}
-	if c.TaskTracker != JIRA && c.TaskTracker != YANDEX_TRACKER {
+	if c.TaskTracker != TaskTrackerJira && c.TaskTracker != TaskTrackerYandexTracker {
 		return errors.New("incorrect task tracker")
 	}
 	return nil
