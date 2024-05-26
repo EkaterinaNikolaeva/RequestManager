@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/mattermost/mattermostmessages"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/bot"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 	"github.com/mattermost/mattermost-server/v6/model"
@@ -30,7 +29,7 @@ func (m MattermostProvider) handleMessage(event *model.WebSocketEvent) {
 	if !checkRequestPostType(event) {
 		return
 	}
-	message, err := mattermostmessages.GetMessage(event.GetData()["post"].(string))
+	message, err := GetMessage(event.GetData()["post"].(string))
 	if err != nil {
 		log.Printf("error when encoding message: %q", err)
 		return

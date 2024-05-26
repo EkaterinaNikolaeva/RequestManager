@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/mattermost/mattermostmessages"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/client/http/mattermosthttpclient"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +21,7 @@ func TestSendMessages(t *testing.T) {
 		bufSize := 1024
 		buffer := make([]byte, bufSize)
 		length, _ := req.Body.Read(buffer)
-		var post mattermostmessages.RequestPost
+		var post mattermosthttpclient.RequestPost
 		json.Unmarshal(buffer[:length], &post)
 		assert.Equal(t, post.ChannelId, testChannelId)
 		assert.Equal(t, post.Message, testMsgText)
@@ -42,7 +41,7 @@ func TestSendMessagesWithError(t *testing.T) {
 		bufSize := 1024
 		buffer := make([]byte, bufSize)
 		length, _ := req.Body.Read(buffer)
-		var post mattermostmessages.RequestPost
+		var post mattermosthttpclient.RequestPost
 		json.Unmarshal(buffer[:length], &post)
 		rw.WriteHeader(404)
 	}))

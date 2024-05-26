@@ -7,8 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-
-	"github.com/EkaterinaNikolaeva/RequestManager/internal/api/mattermost/mattermostmessages"
 )
 
 type MattermostHttpClient struct {
@@ -25,7 +23,7 @@ func NewHttpClient(client *http.Client, token string, baseUrl string) *Mattermos
 	}
 }
 
-func (client *MattermostHttpClient) CreatePost(post mattermostmessages.RequestPost) error {
+func (client *MattermostHttpClient) CreatePost(post RequestPost) error {
 	bytesRepresentation, err := json.Marshal(post)
 	if err != nil {
 		return fmt.Errorf(err.Error() + " when attemp marshal message for creation mattermost post")
