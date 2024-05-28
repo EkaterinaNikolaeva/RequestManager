@@ -16,6 +16,8 @@ type StorageMsgTasksDB struct {
 	tableName string
 }
 
+var sqlOpen = sql.Open
+
 func NewStorageMsgTasksDB(ctx context.Context, login string, password string, host string, port string, name string, table string) (StorageMsgTasksDB, error) {
 	connStr := fmt.Sprintf("postgresql://%v:%v@%v:%v/%v?sslmode=disable",
 		login,
@@ -23,7 +25,7 @@ func NewStorageMsgTasksDB(ctx context.Context, login string, password string, ho
 		host,
 		port,
 		name)
-	db, err := sql.Open("postgres", connStr)
+	db, err := sqlOpen("postgres", connStr)
 	if err != nil {
 		return StorageMsgTasksDB{}, err
 	}
@@ -40,6 +42,7 @@ func NewStorageMsgTasksDB(ctx context.Context, login string, password string, ho
 func (s *StorageMsgTasksDB) AddElement(ctx context.Context, msgId string, taskId string) error {
 	log.Printf("add message %s and task %s to db", msgId, taskId)
 	query := "INSERT INTO " + s.tableName + " (idtask, idmessage) VALUES ($1, $2)"
+	log.Println(query)
 	_, err := s.DB.ExecContext(ctx, query, taskId, msgId)
 	return err
 }
