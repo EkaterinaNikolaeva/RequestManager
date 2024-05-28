@@ -7,7 +7,7 @@ run: build
 	./${BINARY_NAME} $(CONFIG)
 
 test:
-	go test ./... -cover
+	go test -v -coverprofile cover.out ./... && go tool cover -func cover.out
 
 clean:
 	rm -r bin
