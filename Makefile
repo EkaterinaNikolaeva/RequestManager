@@ -12,3 +12,5 @@ test:
 clean:
 	rm -r bin
 
+generate:
+	go generate ./... 
