@@ -43,6 +43,7 @@ func TestSendMessages(t *testing.T) {
 				length, _ := req.Body.Read(buffer)
 				var post mattermosthttpclient.RequestPost
 				json.Unmarshal(buffer[:length], &post)
+
 				assert.Equal(t, post.ChannelId, tc.channelId)
 				assert.Equal(t, post.Message, tc.msgText)
 				assert.Equal(t, post.RootId, tc.rootId)
