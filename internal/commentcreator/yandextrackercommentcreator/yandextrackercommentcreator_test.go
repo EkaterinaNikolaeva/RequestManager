@@ -52,5 +52,4 @@ func TestCreateComment(t *testing.T) {
 			commentCreator.CreateComment(context.Background(), tc.text, tc.taskId)
 		})
 	}
-
 }
