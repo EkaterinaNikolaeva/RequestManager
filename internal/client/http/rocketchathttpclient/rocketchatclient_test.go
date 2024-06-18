@@ -39,6 +39,7 @@ func TestSendMessages(t *testing.T) {
 				bufSize := 1024
 				buffer := make([]byte, bufSize)
 				length, _ := req.Body.Read(buffer)
+
 				assert.Equal(t, req.Header.Get("X-User-Id"), tc.userId)
 				assert.Equal(t, req.Header.Get("X-Auth-Token"), tc.token)
 				var request RequestMessage
@@ -52,5 +53,4 @@ func TestSendMessages(t *testing.T) {
 			assert.Nil(t, rocketChatClient.SendMessage(context.Background(), msg))
 		})
 	}
-
 }
