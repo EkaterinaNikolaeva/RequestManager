@@ -12,10 +12,6 @@ import (
 
 func TestCreateIssue(t *testing.T) {
 	tests := map[string]struct {
-		key            string
-		summary        string
-		description    string
-		issueType      string
 		username       string
 		password       string
 		expectedBase64 string
