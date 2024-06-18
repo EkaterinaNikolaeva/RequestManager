@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"net/http"
 	"net/url"
@@ -89,7 +90,7 @@ func main() {
 		if configData.StorageType == config.POSTGRES {
 			storageValue, err := storagepostgres.NewStorageMsgTasksDB(ctx, configData.PostgresLogin,
 				configData.PostgresPassword, configData.PostgresHost, configData.PostgresPort,
-				configData.PostgresName, configData.PostgresTableName)
+				configData.PostgresName, configData.PostgresTableName, sql.Open)
 			if err != nil {
 				log.Fatalf("Error when connect to postgres %q", err)
 			}

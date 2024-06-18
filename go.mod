@@ -3,11 +3,14 @@ module github.com/EkaterinaNikolaeva/RequestManager
 go 1.18
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/Jeffail/gabs v1.4.0
+	github.com/golang/mock v1.6.0
 	github.com/gopackage/ddp v0.0.6
 	github.com/lib/pq v1.10.4
 	github.com/mattermost/mattermost-server/v6 v6.7.2
 	github.com/stretchr/testify v1.8.4
+	github.com/tj/assert v0.0.3
 	gopkg.in/yaml.v3 v3.0.1
 )
 

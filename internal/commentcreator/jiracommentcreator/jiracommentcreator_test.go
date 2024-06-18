@@ -12,23 +12,39 @@ import (
 )
 
 func TestCreateComment(t *testing.T) {
-	comment := jirahttpclient.JiraCommentRequest{
-		Body: "text",
+	tests := map[string]struct {
+		text           string
+		taskId         string
+		username       string
+		password       string
+		expectedBase64 string
+	}{
+		"simple": {
+			text:           "text",
+			taskId:         "TEST-1",
+			username:       "username",
+			password:       "password",
+			expectedBase64: "Basic dXNlcm5hbWU6cGFzc3dvcmQ=",
+		},
 	}
-	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		assert.Equal(t, req.URL.String(), "/rest/api/2/issue/"+"TEST-1"+"/comment")
-		bufSize := 1024
-		buffer := make([]byte, bufSize)
-		length, _ := req.Body.Read(buffer)
-		assert.Equal(t, req.Header.Get("Authorization"), "Basic dXNlcm5hbWU6cGFzc3dvcmQ=")
-		var requestComment jirahttpclient.JiraCommentRequest
-		json.Unmarshal(buffer[:length], &requestComment)
-		assert.Equal(t, requestComment, comment)
-		rw.Write([]byte(`OK`))
-	}))
-	defer server.Close()
-	client := server.Client()
-	jiraClient := jirahttpclient.NewJiraHttpClient(client, server.URL, "username", "password")
-	commentCreator := NewJiraCommentCreator(jiraClient)
-	commentCreator.CreateComment(context.Background(), "text", "TEST-1")
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+				assert.Equal(t, req.URL.String(), "/rest/api/2/issue/"+tc.taskId+"/comment")
+				bufSize := 1024
+				buffer := make([]byte, bufSize)
+				length, _ := req.Body.Read(buffer)
+				assert.Equal(t, req.Header.Get("Authorization"), tc.expectedBase64)
+				var requestComment jirahttpclient.JiraCommentRequest
+				json.Unmarshal(buffer[:length], &requestComment)
+				assert.Equal(t, requestComment.Body, tc.text)
+				rw.Write([]byte(`OK`))
+			}))
+			defer server.Close()
+			client := server.Client()
+			jiraClient := jirahttpclient.NewJiraHttpClient(client, server.URL, tc.username, tc.password)
+			commentCreator := NewJiraCommentCreator(jiraClient)
+			commentCreator.CreateComment(context.Background(), tc.text, tc.taskId)
+		})
+	}
 }

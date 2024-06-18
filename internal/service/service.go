@@ -9,8 +9,10 @@ import (
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/config"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/task"
-	errornotfound "github.com/EkaterinaNikolaeva/RequestManager/internal/storage/errors"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storageerrors"
 )
+
+//go:generate mockgen -source=service.go -destination=service_mock.go -package=service .
 
 type StorageMsgTasks interface {
 	GetIdTaskByMessage(ctx context.Context, msgId string) (string, error)
@@ -25,11 +27,11 @@ type MessagesProvider interface {
 }
 
 type MessagesSender interface {
-	SendMessage(ctx context.Context, message message.Message) error
+	SendMessage(ctx context.Context, msg message.Message) error
 }
 
 type TaskCreator interface {
-	CreateTask(ctx context.Context, task task.TaskCreateRequest) (task.TaskCreated, error)
+	CreateTask(ctx context.Context, taskRequest task.TaskCreateRequest) (task.TaskCreated, error)
 }
 
 type CommentCreator interface {
@@ -89,7 +91,7 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 			if s.enableMsgThreating {
 				taskId, err := s.storageTaskMessages.GetIdTaskByMessage(ctx, msg.RootMessageId)
 				if err != nil {
-					_, ok := err.(errornotfound.NotFoundError)
+					_, ok := err.(storageerrors.NotFoundError)
 					if !ok {
 						log.Printf("error when get task id by msg %s: %q", msg.RootMessageId, err)
 					}

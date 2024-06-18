@@ -7,7 +7,7 @@ import (
 	"log"
 	"strings"
 
-	errornotfound "github.com/EkaterinaNikolaeva/RequestManager/internal/storage/errors"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storageerrors"
 	_ "github.com/lib/pq"
 )
 
@@ -16,14 +16,14 @@ type StorageMsgTasksDB struct {
 	tableName string
 }
 
-func NewStorageMsgTasksDB(ctx context.Context, login string, password string, host string, port string, name string, table string) (StorageMsgTasksDB, error) {
+func NewStorageMsgTasksDB(ctx context.Context, login string, password string, host string, port string, name string, table string, sqlOpen func(string, string) (*sql.DB, error)) (StorageMsgTasksDB, error) {
 	connStr := fmt.Sprintf("postgresql://%v:%v@%v:%v/%v?sslmode=disable",
 		login,
 		password,
 		host,
 		port,
 		name)
-	db, err := sql.Open("postgres", connStr)
+	db, err := sqlOpen("postgres", connStr)
 	if err != nil {
 		return StorageMsgTasksDB{}, err
 	}
@@ -40,6 +40,7 @@ func NewStorageMsgTasksDB(ctx context.Context, login string, password string, ho
 func (s *StorageMsgTasksDB) AddElement(ctx context.Context, msgId string, taskId string) error {
 	log.Printf("add message %s and task %s to db", msgId, taskId)
 	query := "INSERT INTO " + s.tableName + " (idtask, idmessage) VALUES ($1, $2)"
+	log.Println(query)
 	_, err := s.DB.ExecContext(ctx, query, taskId, msgId)
 	return err
 }
@@ -60,7 +61,7 @@ func (s *StorageMsgTasksDB) GetIdMessageByTask(ctx context.Context, taskId strin
 		}
 		return msgId, nil
 	}
-	return "", errornotfound.NewNotFoundError()
+	return "", storageerrors.NewNotFoundError()
 }
 
 func (s *StorageMsgTasksDB) GetIdTaskByMessage(ctx context.Context, msgId string) (string, error) {
@@ -76,7 +77,7 @@ func (s *StorageMsgTasksDB) GetIdTaskByMessage(ctx context.Context, msgId string
 		taskId = strings.TrimSpace(taskId)
 		return taskId, nil
 	}
-	return "", errornotfound.NewNotFoundError()
+	return "", storageerrors.NewNotFoundError()
 }
 
 func (s *StorageMsgTasksDB) Finish() {

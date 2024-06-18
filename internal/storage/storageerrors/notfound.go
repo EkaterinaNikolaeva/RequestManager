@@ -1,4 +1,4 @@
-package errornotfound
+package storageerrors
 
 type NotFoundError struct {
 }

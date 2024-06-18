@@ -5,7 +5,7 @@ import (
 	"log"
 	"sync"
 
-	errornotfound "github.com/EkaterinaNikolaeva/RequestManager/internal/storage/errors"
+	"github.com/EkaterinaNikolaeva/RequestManager/internal/storage/storageerrors"
 )
 
 type StorageMsgTasksInMemory struct {
@@ -28,7 +28,7 @@ func (s *StorageMsgTasksInMemory) GetIdTaskByMessage(ctx context.Context, msgId 
 	defer s.rwMutex.RUnlock()
 	value, ok := s.TaskByMessage[msgId]
 	if !ok {
-		return value, errornotfound.NewNotFoundError()
+		return value, storageerrors.NewNotFoundError()
 	}
 	return value, nil
 }
@@ -38,7 +38,7 @@ func (s *StorageMsgTasksInMemory) GetIdMessageByTask(ctx context.Context, taskId
 	defer s.rwMutex.RUnlock()
 	value, ok := s.MessageByTask[taskId]
 	if !ok {
-		return value, errornotfound.NewNotFoundError()
+		return value, storageerrors.NewNotFoundError()
 	}
 	return value, nil
 }
