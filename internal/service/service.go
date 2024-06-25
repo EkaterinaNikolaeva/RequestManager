@@ -39,7 +39,7 @@ type CommentCreator interface {
 }
 
 type MessagesMatcher interface {
-	MatchMessage(message message.Message) bool
+	MatchMessage(ctx context.Context, message message.Message) bool
 }
 
 type TaskFromMessagesCreator struct {
@@ -104,7 +104,7 @@ func (s TaskFromMessagesCreator) Run(ctx context.Context) {
 					}
 				}
 			}
-			if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(msg) && !isTask {
+			if !msg.Author.IsBot && s.messagesMatcher.MatchMessage(ctx, msg) && !isTask {
 				var taskName bytes.Buffer
 				err := s.defaultTaskName.Execute(&taskName, s)
 				if err != nil {

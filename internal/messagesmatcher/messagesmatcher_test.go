@@ -1,6 +1,7 @@
 package messagesmatcher
 
 import (
+	"context"
 	"testing"
 
 	"github.com/EkaterinaNikolaeva/RequestManager/internal/domain/message"
@@ -65,7 +66,7 @@ func TestMessagesMatcher(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, matcher.MatchMessage(makeMessage(tc.msg)))
+			assert.Equal(t, tc.expected, matcher.MatchMessage(context.Background(), makeMessage(tc.msg)))
 		})
 	}
 }

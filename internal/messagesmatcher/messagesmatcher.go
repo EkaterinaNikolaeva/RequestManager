@@ -1,6 +1,7 @@
 package messagesmatcher
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -12,7 +13,7 @@ type MessagesMatcher struct {
 	regexpMatcher *regexp.Regexp
 }
 
-func (m MessagesMatcher) MatchMessage(message message.Message) bool {
+func (m MessagesMatcher) MatchMessage(ctx context.Context, message message.Message) bool {
 	isMatch := m.regexpMatcher.MatchString(strings.ToLower(message.MessageText))
 	return isMatch
 }
