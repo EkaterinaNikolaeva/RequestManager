@@ -5,10 +5,13 @@ A service that automates the process of setting tasks in the task tracker by ana
 
 ## Screenshots
 
-<a href="https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI"><img src="https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI" style="width: 250px; max-width: 100%; height: auto" title="Make issue in Yansex Tracker from Rocket.Chat" />
+<a href="https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI"><img src="https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI" style="width: 500px; max-width: 100%; height: auto" title="Make issue in Yansex Tracker from Rocket.Chat" />
 
+<a href="https://drive.google.com/uc?export=view&id=1F6v1PnJXgkXhpt5oAzJQqUE4daMvnVtK"><img src="https://drive.google.com/uc?export=view&id=1F6v1PnJXgkXhpt5oAzJQqUE4daMvnVtK" style="width: 500px; max-width: 100%; height: auto" title="Task in Yandex Tracker" />
 
-![image](https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI)
+<a href="https://drive.google.com/uc?export=view&id=1VsM-VIjz-My8QM0LtWmzmdSL1sjjqRvk"><img src="https://drive.google.com/uc?export=view&id=1VsM-VIjz-My8QM0LtWmzmdSL1sjjqRvk" style="width: 500px; max-width: 100%; height: auto" title="Make issue in Jira from Mattermost with comment" />
+
+<a href="https://drive.google.com/uc?export=view&id=1PqvEMavwIBajgcs2vDDRSEX7F16fbbNV"><img src="https://drive.google.com/uc?export=view&id=1PqvEMavwIBajgcs2vDDRSEX7F16fbbNV" style="width: 500px; max-width: 100%; height: auto" title="Task in Jira with comment" />
 
 ## Installation
 * Install Install the necessary messenger (`Mattermost` or `Rocket.Chat`) and task tracker (`Jira` or `Yandex Tracker`)
