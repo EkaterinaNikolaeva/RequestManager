@@ -1,20 +1,15 @@
 # RequestManager
 
+* [About](#About)
+* [Installation](#Installation)
+* [Configuration](#Configuration)
+* [Screenshots](#Screenshots)
+
 ## About
 A service that automates the process of setting tasks in the task tracker by analyzing messages in the messenger. Integration with Mattermost, Rocket Chat, Jira and Yandex Tracker is currently supported. It is possible to track new messages in the threads for which tasks have been created, with further addition of the message text in the comments to the task.
 
-## Screenshots
-
-<a href="https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI"><img src="https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI" style="width: 500px; max-width: 100%; height: auto" title="Make issue in Yansex Tracker from Rocket.Chat" />
-
-<a href="https://drive.google.com/uc?export=view&id=1F6v1PnJXgkXhpt5oAzJQqUE4daMvnVtK"><img src="https://drive.google.com/uc?export=view&id=1F6v1PnJXgkXhpt5oAzJQqUE4daMvnVtK" style="width: 500px; max-width: 100%; height: auto" title="Task in Yandex Tracker" />
-
-<a href="https://drive.google.com/uc?export=view&id=1VsM-VIjz-My8QM0LtWmzmdSL1sjjqRvk"><img src="https://drive.google.com/uc?export=view&id=1VsM-VIjz-My8QM0LtWmzmdSL1sjjqRvk" style="width: 500px; max-width: 100%; height: auto" title="Make issue in Jira from Mattermost with comment" />
-
-<a href="https://drive.google.com/uc?export=view&id=1PqvEMavwIBajgcs2vDDRSEX7F16fbbNV"><img src="https://drive.google.com/uc?export=view&id=1PqvEMavwIBajgcs2vDDRSEX7F16fbbNV" style="width: 500px; max-width: 100%; height: auto" title="Task in Jira with comment" />
-
 ## Installation
-* Install Install the necessary messenger (`Mattermost` or `Rocket.Chat`) and task tracker (`Jira` or `Yandex Tracker`)
+* Install the necessary messenger (`Mattermost` or `Rocket.Chat`) and task tracker (`Jira` or `Yandex Tracker`)
 * Create bot accounts
 * Save the necessary tokens to environment variables
 * Set up the configuration file
@@ -66,3 +61,21 @@ Yandex Tracker:
 * `env_yandex_tracker_id_organization, env_yandex_tracker_token` - the name of the environment variable containing id organization, token of the bot
 * `yandex_tracker_type_organization, yandex_tracker_token_type` - the name of the environment variable containing type organization, token type of the bot
 * `yandex_tracker_queue`, `yandex_tracker_task_type`: allows you to configure the task creation parameters in yandex tracker
+
+## Screenshots
+
+Make issue in Yansex Tracker from Rocket.Chat:
+
+<a href="https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI"><img src="https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI" style="width: 500px; max-width: 100%; height: auto" title="Make issue in Yansex Tracker from Rocket.Chat" />
+
+Task in Yandex Tracker:
+
+<a href="https://drive.google.com/uc?export=view&id=1F6v1PnJXgkXhpt5oAzJQqUE4daMvnVtK"><img src="https://drive.google.com/uc?export=view&id=1F6v1PnJXgkXhpt5oAzJQqUE4daMvnVtK" style="width: 500px; max-width: 100%; height: auto" title="Task in Yandex Tracker" />
+
+Make issue in Jira from Mattermost with comment:
+
+<a href="https://drive.google.com/uc?export=view&id=1VsM-VIjz-My8QM0LtWmzmdSL1sjjqRvk"><img src="https://drive.google.com/uc?export=view&id=1VsM-VIjz-My8QM0LtWmzmdSL1sjjqRvk" style="width: 500px; max-width: 100%; height: auto" title="Make issue in Jira from Mattermost with comment" />
+
+Task in Jira with comment:
+
+<a href="https://drive.google.com/uc?export=view&id=1PqvEMavwIBajgcs2vDDRSEX7F16fbbNV"><img src="https://drive.google.com/uc?export=view&id=1PqvEMavwIBajgcs2vDDRSEX7F16fbbNV" style="width: 500px; max-width: 100%; height: auto" title="Task in Jira with comment" />
