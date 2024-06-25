@@ -5,6 +5,9 @@ A service that automates the process of setting tasks in the task tracker by ana
 
 ## Screenshots
 
+<a href="https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI"><img src="https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI" style="width: 250px; max-width: 100%; height: auto" title="Make issue in Yansex Tracker from Rocket.Chat" />
+
+
 ![image](https://drive.google.com/uc?export=view&id=1FafBEh-SpztnF7gqo5aLkAa4zww1CthI)
 
 ## Installation
