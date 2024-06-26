@@ -18,6 +18,10 @@ A service that automates the process of setting tasks in the task tracker by ana
 ```
 make run
 ```
+* Testing
+```
+make test
+```
 
 ## Configuration 
 An example of the config is in the file `configs/config.yml`
