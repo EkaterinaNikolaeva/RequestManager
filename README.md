@@ -8,6 +8,8 @@
 ## About
 A service that automates the process of setting tasks in the task tracker by analyzing messages in the messenger. Integration with Mattermost, Rocket Chat, Jira and Yandex Tracker is currently supported. It is possible to track new messages in the threads for which tasks have been created, with further addition of the message text in the comments to the task.
 
+For more information, see the [project presentation](https://docs.google.com/presentation/d/1H1ijeXi17_d-5E51pBWrm1nz3PQ1yWXh1ni3gmcrDEE/edit#slide=id.g2e50b60cb79_1_49)
+
 ## Installation
 * Install the necessary messenger (`Mattermost` or `Rocket.Chat`) and task tracker (`Jira` or `Yandex Tracker`)
 * Create bot accounts
